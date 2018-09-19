@@ -1,0 +1,340 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Module Reference &#8212; ml_uncertainty 0.1.1 documentation</title>
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css" />
+    <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/leaveNotice/css/jquery.leaveNotice.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://pages.nist.gov/nist-header-footer/js/jquery-1.9.0.min.js"></script>
+    <script type="text/javascript" src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js"></script>
+    <script id="_fed_an_ua_tag" type="text/javascript" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NIST&subagency=github&pua=UA-42404149-54&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery.1.12.4.min.js"></script>
+    <script type="text/javascript" src="https://pages.nist.gov/leaveNotice/js/jquery.leaveNotice-nist.min.js"></script>
+    <script type="text/javascript" src="_static/leave_notice.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Example toy problem" href="toy_regression.html" />
+    <link rel="prev" title="Machine Learning Uncertainty Estimation Toolbox" href="index.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="index.html">ml_uncertainty 0.1.1 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="index.html" title="Machine Learning Uncertainty Estimation Toolbox"
+             accesskey="P">previous</a> |
+          <a href="toy_regression.html" title="Example toy problem"
+             accesskey="N">next</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-reference">
+<h1>Module Reference<a class="headerlink" href="#module-reference" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="function-summary">
+<h2>Function Summary<a class="headerlink" href="#function-summary" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#ml_uncertainty.cross_validate" title="ml_uncertainty.cross_validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cross_validate</span></code></a>([xdata,&nbsp;ydata,&nbsp;PLS_model,&nbsp;…])</td>
+<td>Conducts a cross-validation analysis on a set of data using a regression algorithm.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#ml_uncertainty.simple_bootstrap" title="ml_uncertainty.simple_bootstrap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simple_bootstrap</span></code></a>([xdata,&nbsp;ydata,&nbsp;PLS_model,&nbsp;…])</td>
+<td>Conducts a simple residual bootstrap analysis on a set of data.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#ml_uncertainty.bootstrap" title="ml_uncertainty.bootstrap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bootstrap</span></code></a>([xdata,&nbsp;ydata,&nbsp;validdata,&nbsp;…])</td>
+<td>Conducts a simple residual bootstrap analysis on a set of data.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#ml_uncertainty.bootstrap_unc" title="ml_uncertainty.bootstrap_unc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bootstrap_unc</span></code></a>([xdata,&nbsp;ydata,&nbsp;valid_data,&nbsp;…])</td>
+<td>Computes the uncertainty in a bootstrap analysis by leave-one-out cross-validation.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#ml_uncertainty.pca_bootstrap" title="ml_uncertainty.pca_bootstrap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pca_bootstrap</span></code></a>([xdata,&nbsp;ydata,&nbsp;groups,&nbsp;…])</td>
+<td>Conducts a residual bootstrap analysis on a set of data.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#ml_uncertainty.misclass_probability" title="ml_uncertainty.misclass_probability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">misclass_probability</span></code></a>(probability_zero,&nbsp;…)</td>
+<td>Estimate the misclassification probability of a sample, which is based on the confidence level of the prediction compared to the true value.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="function-documentation">
+<h2>Function documentation<a class="headerlink" href="#function-documentation" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ml_uncertainty.cross_validate">
+<code class="descclassname">ml_uncertainty.</code><code class="descname">cross_validate</code><span class="sig-paren">(</span><em>xdata=None</em>, <em>ydata=None</em>, <em>PLS_model=None</em>, <em>cv_object=None</em>, <em>sk_model=&lt;class 'sklearn.cross_decomposition.pls_.PLSRegression'&gt;</em>, <em>PLS_kw=None</em>, <em>class_value=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ml_uncertainty.html#cross_validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ml_uncertainty.cross_validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conducts a cross-validation analysis on a set of data using a regression algorithm.</p>
+<p>This function is essentially a pass-through to <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.model_selection.cross_val_predict</span></code>, and then does PLS-DA class assignments</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Key xdata:</th><td class="field-body">The X data used to fit the model (default None)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key ydata:</th><td class="field-body">The Y data used to fit the model (default None)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key PLS_model:</th><td class="field-body">The scikit-learn model that will be fit using X and Y</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key cv_object:</th><td class="field-body">The cross-validation model that will be used for calculating cross-validation statistics</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key sk_model:</th><td class="field-body">If PLS_model,PLS_cv,or PLS_bootstrap is None, this scikit-learn model will be used to create them</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key PLS_kw:</th><td class="field-body">The keyword arguments that will be passed to sk_model</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Key class_value:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">The value separating the classes in PLS-DA</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">class_assigned_cv, which is the dummy variable array in PLS-DA, and class_predicted_cv, the array of PLS predictions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ml_uncertainty.simple_bootstrap">
+<code class="descclassname">ml_uncertainty.</code><code class="descname">simple_bootstrap</code><span class="sig-paren">(</span><em>xdata=None</em>, <em>ydata=None</em>, <em>PLS_model=None</em>, <em>PLS_cv=None</em>, <em>PLS_bootstrap=None</em>, <em>sk_model=&lt;class 'sklearn.cross_decomposition.pls_.PLSRegression'&gt;</em>, <em>cv_object=None</em>, <em>class_value=0.5</em>, <em>samples=1000</em>, <em>PLS_kw=None</em>, <em>return_boot=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ml_uncertainty.html#simple_bootstrap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ml_uncertainty.simple_bootstrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conducts a simple residual bootstrap analysis on a set of data. Computes cross-validation uncertainty.</p>
+<p>This function relies on the Y-data being bootstrapped to be one-dimensional. It also requires the model to be accept two-dimensional data. The bootstrapping is done by generating <span class="math notranslate nohighlight">\(samples\)</span> random variations on the Y-data and then concatenating them into a two-dimensional array.</p>
+<p>If PLS_model is None, then PLS_cv and PLS_bootstrap are ignored. The function will create independent instances of :py:class:sk_model for each of PLS_model, PLS_cv, and PLS_boostrap.</p>
+<p>If PLS_model is not None, then it will be reused for PLS_cv and PLS_bootstrap.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Key xdata:</th><td class="field-body">The X data used to fit the model (default None)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key ydata:</th><td class="field-body">The Y data used to fit the model (default None)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key PLS_model:</th><td class="field-body">The scikit-learn model that will be fit using X and Y</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key PLS_cv:</th><td class="field-body">The scikit-learn model that will be used for cross-validation</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Key PLS_bootstrap:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">The scikit-learn model that will be used for bootstrapping</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key sk_model:</th><td class="field-body">If PLS_model,PLS_cv,or PLS_bootstrap is None, this scikit-learn model will be used to create them</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key cv_object:</th><td class="field-body">The cross-validation model that will be used for calculating cross-validation statistics</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Key class_value:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">The value separating the classes in PLS-DA</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key samples:</th><td class="field-body">The number of samples for bootstrapping</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key PLS_kw:</th><td class="field-body">The keyword arguments that will be passed to sk_model</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Key return_boot:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">If True, returns the PLS_bootstrap model as part of the output</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ml_uncertainty.bootstrap">
+<code class="descclassname">ml_uncertainty.</code><code class="descname">bootstrap</code><span class="sig-paren">(</span><em>xdata=None</em>, <em>ydata=None</em>, <em>validdata=None</em>, <em>PLS_model=None</em>, <em>PLS_cv=None</em>, <em>PLS_bootstrap=None</em>, <em>sk_model=&lt;class 'sklearn.cross_decomposition.pls_.PLSRegression'&gt;</em>, <em>regression=False</em>, <em>cv_object=None</em>, <em>class_value=0.5</em>, <em>samples=1000</em>, <em>PLS_kw=None</em>, <em>return_scores=False</em>, <em>return_loadings=False</em>, <em>tq=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ml_uncertainty.html#bootstrap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ml_uncertainty.bootstrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conducts a simple residual bootstrap analysis on a set of data. Computes cross-validation uncertainty.</p>
+<p>This function performs a full bootstrap and makes no assumption about the shape or structure of the Y data. Each bootstrap sample will have an independent model fit to it.</p>
+<p>If PLS_model is None, then PLS_cv and PLS_bootstrap are ignored. The function will create independent instances of :py:class:sk_model for each of PLS_model, PLS_cv, and PLS_boostrap.</p>
+<p>If PLS_model is not None, then it will be reused for PLS_cv and PLS_bootstrap.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Key xdata:</th><td class="field-body">The X data used to fit the model (default None)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key ydata:</th><td class="field-body">The Y data used to fit the model (default None)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key validdata:</th><td class="field-body">Additional data not used to fit the model but for which uncertainty will be calculated</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key PLS_model:</th><td class="field-body">The scikit-learn model that will be fit using X and Y. If None, a new model will be created from sk_model</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key PLS_cv:</th><td class="field-body">The scikit-learn model that will be used for cross-validation. If None, same as PLS_model.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Key PLS_bootstrap:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">The scikit-learn model that will be used for bootstrapping. If None, same as PLS_model.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key sk_model:</th><td class="field-body">If PLS_model,PLS_cv,or PLS_bootstrap is None, this scikit-learn model will be used to create them</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key cv_object:</th><td class="field-body">The cross-validation model that will be used for calculating cross-validation statistics</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Key class_value:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">The value separating the classes in PLS-DA</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key samples:</th><td class="field-body">The number of samples for bootstrapping</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key PLS_kw:</th><td class="field-body">The keyword arguments that will be passed to sk_model</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Key return_scores:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">If True, returns the scores of the PLS_bootstrap model as part of the output</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Key return_loadings:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">If True, returns the loadings of the PLS_bootstrap model as part of the output</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ml_uncertainty.bootstrap_unc">
+<code class="descclassname">ml_uncertainty.</code><code class="descname">bootstrap_unc</code><span class="sig-paren">(</span><em>xdata=None</em>, <em>ydata=None</em>, <em>valid_data=None</em>, <em>cv_object=None</em>, <em>samples=1000</em>, <em>class_value=0.5</em>, <em>PLS_kw=None</em>, <em>return_scores=False</em>, <em>tq=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ml_uncertainty.html#bootstrap_unc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ml_uncertainty.bootstrap_unc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the uncertainty in a bootstrap analysis by leave-one-out cross-validation.</p>
+<p>For each sample, the uncertainty is calculated by fitting the other samples to the model, calculating the bootstrap uncertainty and then calculating the uncertainty in the held-out sample.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Key xdata:</th><td class="field-body">The X data used to fit the model (default None)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key ydata:</th><td class="field-body">The Y data used to fit the model (default None)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key valid_data:</th><td class="field-body">Additional data not used to fit the model but for which uncertainty will be calculated</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key cv_object:</th><td class="field-body">The cross-validation model that will be used for calculating cross-validation statistics</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key samples:</th><td class="field-body">The number of samples for bootstrapping</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Key class_value:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">The value separating the classes in PLS-DA</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key PLS_kw:</th><td class="field-body">The keyword arguments that will be passed to sk_model</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Key return_scores:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">If True, returns the scores of the PLS_bootstrap model as part of the output</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ml_uncertainty.pca_bootstrap">
+<code class="descclassname">ml_uncertainty.</code><code class="descname">pca_bootstrap</code><span class="sig-paren">(</span><em>xdata=None</em>, <em>ydata=None</em>, <em>groups=None</em>, <em>validdata=None</em>, <em>PCA_model=None</em>, <em>PCA_cv=None</em>, <em>PCA_bootstrap=None</em>, <em>skmodel=&lt;class 'sklearn.decomposition.pca.PCA'&gt;</em>, <em>scaler=None</em>, <em>cv_object=None</em>, <em>samples=1000</em>, <em>PCA_kw=None</em>, <em>tq=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ml_uncertainty.html#pca_bootstrap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ml_uncertainty.pca_bootstrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conducts a residual bootstrap analysis on a set of data. Computes cross-validation uncertainty.</p>
+<p>This function is the same as <a class="reference internal" href="#ml_uncertainty.bootstrap" title="ml_uncertainty.bootstrap"><code class="xref py py-func docutils literal notranslate"><span class="pre">bootstrap()</span></code></a> but works for unsupervised models such as PCA</p>
+<p>If PLS_model is None, then PLS_cv and PLS_bootstrap are ignored. The function will create independent instances of :py:class:sk_model for each of PLS_model, PLS_cv, and PLS_boostrap.</p>
+<p>If PLS_model is not None, then it will be reused for PLS_cv and PLS_bootstrap.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Key xdata:</th><td class="field-body">The X data used to fit the model (default None)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key ydata:</th><td class="field-body">The Y data used to fit the model (default None)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key PCA_model:</th><td class="field-body">The scikit-learn model that will be fit using X</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key PCA_cv:</th><td class="field-body">The scikit-learn model that will be used for cross-validation</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Key PCA_bootstrap:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">The scikit-learn model that will be used for bootstrapping</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key sk_model:</th><td class="field-body">If PLS_model,PLS_cv,or PLS_bootstrap is None, this scikit-learn model will be used to create them</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key scaler:</th><td class="field-body">The scikit-learn preprocessing object used to preprocess the data. This will be put into a</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key cv_object:</th><td class="field-body">The cross-validation model that will be used for calculating cross-validation statistics</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Key samples:</th><td class="field-body">The number of samples for bootstrapping</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Key PCA_kw:</th><td class="field-body">The keyword arguments that will be passed to sk_model</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Key return_boot:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">If True, returns the PLS_bootstrap model as part of the output</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ml_uncertainty.misclass_probability">
+<code class="descclassname">ml_uncertainty.</code><code class="descname">misclass_probability</code><span class="sig-paren">(</span><em>probability_zero</em>, <em>misclass_mask</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ml_uncertainty.html#misclass_probability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ml_uncertainty.misclass_probability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the misclassification probability of a sample, which is based on the confidence level of the prediction compared to the true value.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table of Contents</h3>
+          <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Module Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#function-summary">Function Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#function-documentation">Function documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="toy_regression.html">Example toy problem</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="index.html" title="Machine Learning Uncertainty Estimation Toolbox"
+              >previous</a> |
+            <a href="toy_regression.html" title="Example toy problem"
+              >next</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/docs.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.0.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

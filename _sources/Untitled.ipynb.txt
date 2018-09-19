@@ -1,0 +1,88 @@
+{
+ "cells": [
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "Example toy problem\n",
+    "*******************\n",
+    "\n",
+    "Imports\n",
+    "======="
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2018-09-19T19:34:20.222180Z",
+     "start_time": "2018-09-19T19:34:19.530775Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "%matplotlib inline\n",
+    "import matplotlib.pyplot as plt\n",
+    "import numpy as np\n",
+    "import sklearn.linear_model as sklm\n",
+    "import sklearn.model_selection as skcv\n",
+    "import pls_uncertainty as plu"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "Data and Metadata\n",
+    "=================\n",
+    "\n",
+    "Data for the toy problem\n",
+    "------------------------\n",
+    "\n",
+    "Here's some X data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python [conda env:py3]",
+   "language": "python",
+   "name": "conda-env-py3-py"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.5"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": true,
+   "sideBar": true,
+   "skip_h1_title": false,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

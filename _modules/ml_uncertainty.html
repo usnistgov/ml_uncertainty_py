@@ -1,0 +1,1001 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ml_uncertainty &#8212; ml_uncertainty 0.1.1 documentation</title>
+    <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css" />
+    <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/leaveNotice/css/jquery.leaveNotice.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://pages.nist.gov/nist-header-footer/js/jquery-1.9.0.min.js"></script>
+    <script type="text/javascript" src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js"></script>
+    <script id="_fed_an_ua_tag" type="text/javascript" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NIST&subagency=github&pua=UA-42404149-54&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery.1.12.4.min.js"></script>
+    <script type="text/javascript" src="https://pages.nist.gov/leaveNotice/js/jquery.leaveNotice-nist.min.js"></script>
+    <script type="text/javascript" src="../_static/leave_notice.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">ml_uncertainty 0.1.1 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ml_uncertainty</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sklearn.decomposition</span>
+<span class="kn">import</span> <span class="nn">sklearn.cross_decomposition</span>
+<span class="kn">import</span> <span class="nn">sklearn.model_selection</span>
+<span class="kn">import</span> <span class="nn">sklearn.pipeline</span> <span class="k">as</span> <span class="nn">skpipe</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">tqdm</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+
+<span class="k">def</span> <span class="nf">get_probabilities</span><span class="p">(</span><span class="n">class_predicted</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">data_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">PLS_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="c1">#class_predicted = PLS_model.predict(data) # Get the predicted classes for this data set</span>
+    <span class="n">probability_zero</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># Empty list to be filled with the </span>
+    <span class="k">for</span> <span class="n">mol_num</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">class_predicted</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">data_error</span><span class="p">[</span><span class="n">mol_num</span><span class="p">]</span>
+        <span class="n">prob_zero</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="mi">1</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">erf</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">class_value</span> <span class="o">-</span> <span class="n">value</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">error</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="p">)</span> <span class="c1"># Find where 0.5 falls on the cumulative distribution function</span>
+        <span class="n">probability_zero</span> <span class="o">+=</span> <span class="p">[</span><span class="n">prob_zero</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">probability_zero</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">class_assignment</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">data_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">PLS_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="n">class_predicted</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="k">if</span> <span class="n">PLS_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">class_predicted</span> <span class="o">=</span> <span class="n">PLS_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="c1"># Get the predicted classes for this data set</span>
+    <span class="n">class_assigned</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">class_predicted</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">class_assigned</span><span class="p">[</span><span class="n">class_predicted</span> <span class="o">&gt;</span> <span class="n">class_value</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">class_assigned</span><span class="p">,</span><span class="n">class_predicted</span>
+<span class="k">def</span> <span class="nf">class_assignment_boot</span><span class="p">(</span><span class="n">class_predicted_bootstrap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">data_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">PLS_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="c1">#class_predicted_bootstrap = PLS_model.predict(data)</span>
+    <span class="n">class_predicted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">class_predicted_bootstrap</span><span class="p">,</span><span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">class_assigned</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">class_predicted</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">class_assigned</span><span class="p">[</span><span class="n">class_predicted</span> <span class="o">&gt;</span> <span class="n">class_value</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">class_assigned</span><span class="p">,</span><span class="n">class_predicted</span><span class="p">,</span><span class="n">class_predicted_bootstrap</span>
+<span class="k">def</span> <span class="nf">find_misclassified</span><span class="p">(</span><span class="n">true_class</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">assigned_class</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">misclass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">true_class</span> <span class="o">-</span> <span class="n">assigned_class</span><span class="o">.</span><span class="n">T</span><span class="p">))</span> <span class="c1"># If true class == assigned class, this will be 0, otherwise 1 or -1</span>
+    <span class="n">misclass_mask</span> <span class="o">=</span> <span class="n">misclass</span> <span class="o">==</span> <span class="mi">1</span> 
+    <span class="k">return</span> <span class="n">misclass</span><span class="p">,</span><span class="n">misclass_mask</span>
+<span class="k">def</span> <span class="nf">_estimate_class_boundary</span><span class="p">(</span><span class="n">predicted_class</span><span class="p">,</span><span class="n">actual_class</span><span class="p">):</span>
+    <span class="c1">#Find which samples correspond to actual classes 1 and 0</span>
+    <span class="n">class_one</span> <span class="o">=</span> <span class="n">predicted_class</span><span class="p">[</span><span class="n">actual_class</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">class_zero</span> <span class="o">=</span> <span class="n">predicted_class</span><span class="p">[</span><span class="n">actual_class</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="c1">#Find the mean prediction and standard deviation for all of the class 1 samples</span>
+    <span class="n">class_one_mean</span> <span class="o">=</span> <span class="n">class_one</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">class_one_std</span> <span class="o">=</span> <span class="n">class_one</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+    
+    <span class="c1">#Find the mean prediction and standard deviation for all of the class 0 samples</span>
+    <span class="n">class_zero_mean</span> <span class="o">=</span> <span class="n">class_zero</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">class_zero_std</span> <span class="o">=</span> <span class="n">class_zero</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+    
+    <span class="c1">#Compute the location where class 1 and class 0 probability density functions are equal</span>
+    <span class="n">log_std_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">class_one_std</span> <span class="o">/</span> <span class="n">class_zero_std</span><span class="p">)</span>
+    <span class="n">mean_diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">class_one_mean</span> <span class="o">-</span> <span class="n">class_zero_mean</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">mean_avg</span> <span class="o">=</span> <span class="p">(</span><span class="n">class_one_mean</span> <span class="o">+</span> <span class="n">class_zero_mean</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    
+    <span class="n">class_boundary</span> <span class="o">=</span> <span class="p">((</span><span class="n">class_one_std</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">class_zero_std</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">mean_diff</span> <span class="o">*</span> <span class="n">log_std_ratio</span> <span class="o">+</span> <span class="n">mean_avg</span>
+    <span class="k">return</span> <span class="n">class_boundary</span>
+
+<span class="k">def</span> <span class="nf">estimate_class_boundary</span><span class="p">(</span><span class="n">predicted_class</span><span class="p">,</span><span class="n">actual_class</span><span class="p">):</span>
+    <span class="c1">#Find which samples correspond to actual classes 1 and 0</span>
+    <span class="n">class_one</span> <span class="o">=</span> <span class="n">predicted_class</span><span class="p">[</span><span class="n">actual_class</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">class_zero</span> <span class="o">=</span> <span class="n">predicted_class</span><span class="p">[</span><span class="n">actual_class</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="c1">#print(class_one)</span>
+    <span class="c1">#print(class_zero)</span>
+    
+    <span class="c1">#Find the mean prediction and standard deviation for all of the class 1 samples</span>
+    <span class="n">class_one_mean</span> <span class="o">=</span> <span class="n">class_one</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">class_one_std</span> <span class="o">=</span> <span class="n">class_one</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+    
+    <span class="c1">#Find the mean prediction and standard deviation for all of the class 0 samples</span>
+    <span class="n">class_zero_mean</span> <span class="o">=</span> <span class="n">class_zero</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">class_zero_std</span> <span class="o">=</span> <span class="n">class_zero</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+    
+    <span class="c1">#Compute the location where class 1 and class 0 probability density functions are equal</span>
+    <span class="c1">#These are constants needed in the calculation</span>
+    <span class="n">log_std_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">class_zero_std</span> <span class="o">/</span> <span class="n">class_one_std</span><span class="p">)</span>
+    <span class="n">var_product</span> <span class="o">=</span> <span class="p">(</span><span class="n">class_zero_std</span> <span class="o">*</span> <span class="n">class_one_std</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">var_diff</span> <span class="o">=</span> <span class="n">class_zero_std</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">class_one_std</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">mean_diff_squared</span> <span class="o">=</span> <span class="p">(</span><span class="n">class_one_mean</span> <span class="o">-</span> <span class="n">class_zero_mean</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+    
+    <span class="c1">#Coefficients in the quadratic for x</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">var_diff</span>
+    <span class="n">minus_b</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">class_one_mean</span> <span class="o">*</span> <span class="p">(</span><span class="n">class_zero_std</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">class_zero_mean</span> <span class="o">*</span> <span class="p">(</span><span class="n">class_one_std</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="p">((</span><span class="n">class_zero_mean</span> <span class="o">*</span> <span class="n">class_one_std</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="p">(</span><span class="n">class_one_mean</span> <span class="o">*</span> <span class="n">class_zero_std</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">log_std_ratio</span><span class="o">*</span><span class="n">var_product</span><span class="p">)</span>
+    
+    <span class="c1">#Simplify the discriminant</span>
+    <span class="n">discriminant</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">log_std_ratio</span><span class="o">*</span><span class="n">var_product</span><span class="o">*</span><span class="n">var_diff</span> <span class="o">+</span> <span class="n">var_product</span><span class="o">*</span><span class="n">mean_diff_squared</span><span class="p">)</span>
+    
+    <span class="n">center</span> <span class="o">=</span> <span class="n">minus_b</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">)</span>
+    
+    <span class="c1">#Quadratic, so two roots</span>
+    <span class="c1">#Quadratic, so two roots</span>
+    <span class="n">plus_boundary</span> <span class="o">=</span> <span class="p">(</span><span class="n">minus_b</span> <span class="o">+</span> <span class="n">discriminant</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">minus_boundary</span> <span class="o">=</span> <span class="p">(</span><span class="n">minus_b</span> <span class="o">-</span> <span class="n">discriminant</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">)</span>
+    
+    <span class="n">upper_boundary</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">plus_boundary</span><span class="p">,</span><span class="n">minus_boundary</span><span class="p">)</span>
+    <span class="n">lower_boundary</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">plus_boundary</span><span class="p">,</span><span class="n">minus_boundary</span><span class="p">)</span>
+    
+    <span class="c1">#Choose boundary based on which std is bigger (equivalent to sign of var_diff)</span>
+    <span class="n">class_boundary</span> <span class="o">=</span> <span class="n">lower_boundary</span> 
+    <span class="k">if</span> <span class="n">upper_boundary</span> <span class="o">&lt;</span> <span class="n">class_one_mean</span> <span class="p">:</span> <span class="n">class_boundary</span> <span class="o">=</span> <span class="n">upper_boundary</span>
+
+    <span class="k">return</span> <span class="n">class_boundary</span>
+
+<span class="k">def</span> <span class="nf">bootstrap_stratified</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">classes</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">num_data</span><span class="p">,</span><span class="n">num_classes</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">shape</span><span class="c1">#Get the shape of the class data</span>
+    
+    <span class="n">full_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_data</span><span class="p">)</span><span class="c1">#Get an array of the indices</span>
+    
+    <span class="n">data_boot</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">boot_indices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">class_num</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
+        <span class="n">class_mask</span> <span class="o">=</span> <span class="n">classes</span><span class="p">[:,</span><span class="n">class_num</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="c1">#Find which samples are in this class</span>
+        <span class="n">this_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">class_mask</span><span class="p">]</span> <span class="c1">#Get the x data</span>
+        <span class="n">this_indices</span> <span class="o">=</span> <span class="n">full_indices</span><span class="p">[</span><span class="n">class_mask</span><span class="p">]</span>
+        <span class="c1">#Boot the straps</span>
+        <span class="n">this_boot</span><span class="p">,</span><span class="n">this_boot_indices</span> <span class="o">=</span> <span class="n">bootstrap_data</span><span class="p">(</span><span class="n">this_data</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+        <span class="c1">#Put the data into a list</span>
+        <span class="n">data_boot</span> <span class="o">+=</span> <span class="p">[</span><span class="n">this_boot</span><span class="p">]</span>
+        <span class="c1">#use the local indices to get where these data came from in the full matrix</span>
+        <span class="n">boot_indices</span> <span class="o">+=</span> <span class="p">[</span><span class="n">this_indices</span><span class="p">[</span><span class="n">this_boot_indices</span><span class="p">]]</span>
+        
+    <span class="n">data_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">data_boot</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">boot_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">boot_indices</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data_boot</span><span class="p">,</span><span class="n">boot_indices</span>
+
+
+<span class="k">def</span> <span class="nf">bootstrap_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates random indices in order to conduct bootstrap uncertainty analysis. Returns also the permuted data matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">array_shape</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">boot_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">samples</span><span class="p">,)</span> <span class="o">+</span> <span class="p">(</span><span class="n">array_shape</span><span class="p">[</span><span class="n">axis</span><span class="p">],)</span>
+    
+    <span class="n">boot_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">array_shape</span><span class="p">[</span><span class="n">axis</span><span class="p">],</span><span class="n">boot_shape</span><span class="p">)</span>
+    
+    <span class="n">boot_out</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">boot_indices</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">boot_out</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span> <span class="n">boot_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">boot_out</span><span class="p">,</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">boot_out</span><span class="p">,</span><span class="n">boot_indices</span>
+
+
+<div class="viewcode-block" id="simple_bootstrap"><a class="viewcode-back" href="../docs.html#ml_uncertainty.simple_bootstrap">[docs]</a><span class="k">def</span> <span class="nf">simple_bootstrap</span><span class="p">(</span><span class="n">xdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ydata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">PLS_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">PLS_cv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">PLS_bootstrap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">sk_model</span><span class="o">=</span><span class="n">sklearn</span><span class="o">.</span><span class="n">cross_decomposition</span><span class="o">.</span><span class="n">PLSRegression</span><span class="p">,</span>
+                     <span class="n">cv_object</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">PLS_kw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">return_boot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Conducts a simple residual bootstrap analysis on a set of data. Computes cross-validation uncertainty.</span>
+<span class="sd">    </span>
+<span class="sd">    This function relies on the Y-data being bootstrapped to be one-dimensional. It also requires the model to be accept two-dimensional data. The bootstrapping is done by generating :math:`samples` random variations on the Y-data and then concatenating them into a two-dimensional array.</span>
+<span class="sd">    </span>
+<span class="sd">    If PLS_model is None, then PLS_cv and PLS_bootstrap are ignored. The function will create independent instances of :py:class:sk_model for each of PLS_model, PLS_cv, and PLS_boostrap.</span>
+<span class="sd">    </span>
+<span class="sd">    If PLS_model is not None, then it will be reused for PLS_cv and PLS_bootstrap.</span>
+<span class="sd">    </span>
+<span class="sd">    :key xdata: The X data used to fit the model (default None)</span>
+<span class="sd">    :key ydata: The Y data used to fit the model (default None)</span>
+<span class="sd">    :key PLS_model: The scikit-learn model that will be fit using X and Y</span>
+<span class="sd">    :key PLS_cv: The scikit-learn model that will be used for cross-validation</span>
+<span class="sd">    :key PLS_bootstrap: The scikit-learn model that will be used for bootstrapping</span>
+<span class="sd">    :key sk_model: If PLS_model,PLS_cv,or PLS_bootstrap is None, this scikit-learn model will be used to create them</span>
+<span class="sd">    :key cv_object: The cross-validation model that will be used for calculating cross-validation statistics</span>
+<span class="sd">    :key class_value: The value separating the classes in PLS-DA</span>
+<span class="sd">    :key samples: The number of samples for bootstrapping</span>
+<span class="sd">    :key PLS_kw: The keyword arguments that will be passed to sk_model</span>
+<span class="sd">    :key return_boot: If True, returns the PLS_bootstrap model as part of the output</span>
+<span class="sd">    :type xdata: ndarray</span>
+<span class="sd">    :type ydata: 1-d array</span>
+<span class="sd">    :type PLS_model: scikit-learn model instance</span>
+<span class="sd">    :type PLS_cv: scikit-learn model instance</span>
+<span class="sd">    :type PLS_bootstrap: scikit-learn model instance</span>
+<span class="sd">    :type skmodel: scikit-learn model</span>
+<span class="sd">    :type cv_object: scikit-learn model selection instance</span>
+<span class="sd">    :type class_value: scalar</span>
+<span class="sd">    :type samples: int</span>
+<span class="sd">    :type PLS_kw: dict</span>
+<span class="sd">    :type return_boot: Boolean</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">PLS_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1">#PLS_model = sklearn.cross_decomposition.PLSRegression(**PLS_kw)</span>
+        <span class="c1">#PLS_cv = sklearn.cross_decomposition.PLSRegression(**PLS_kw)</span>
+        <span class="c1">#PLS_bootstrap = sklearn.cross_decomposition.PLSRegression(**PLS_kw)</span>
+        <span class="n">PLS_model</span> <span class="o">=</span> <span class="n">sk_model</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>
+        <span class="n">PLS_cv</span> <span class="o">=</span> <span class="n">sk_model</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>
+        <span class="n">PLS_bootstrap</span> <span class="o">=</span> <span class="n">sk_model</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>     
+    
+    <span class="nb">print</span> <span class="p">(</span><span class="n">PLS_model</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">PLS_cv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">PLS_cv</span> <span class="o">=</span> <span class="n">PLS_model</span>
+    <span class="k">if</span> <span class="n">PLS_bootstrap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">PLS_bootstrap</span> <span class="o">=</span> <span class="n">PLS_model</span>
+    
+    <span class="n">tpls</span> <span class="o">=</span> <span class="n">PLS_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="p">)</span>
+    
+    <span class="c1">#Get class assignments for the base PLS model</span>
+    <span class="n">class_assigned_train</span><span class="p">,</span><span class="n">class_predicted_train</span> <span class="o">=</span> <span class="n">class_assignment</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">xdata</span><span class="p">,</span><span class="n">PLS_model</span><span class="o">=</span><span class="n">PLS_model</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="n">class_value</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">cv_object</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cv_object</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+    
+    <span class="c1">#Cross-validate</span>
+    <span class="n">class_assigned_cv</span><span class="p">,</span><span class="n">class_predicted_cv</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">xdata</span><span class="o">=</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="o">=</span><span class="n">ydata</span><span class="p">,</span>
+                                                         <span class="n">PLS_model</span><span class="o">=</span><span class="n">PLS_cv</span><span class="p">,</span><span class="n">cv_object</span><span class="o">=</span><span class="n">cv_object</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="n">class_value</span><span class="p">)</span>
+    
+    <span class="c1">#Calculate residuals and mean squared errors of regression</span>
+    <span class="n">residual</span><span class="p">,</span><span class="n">err</span><span class="p">,</span><span class="n">mse</span> <span class="o">=</span> <span class="n">get_residual_stats</span><span class="p">(</span><span class="n">ydata</span><span class="p">,</span><span class="n">class_predicted_train</span><span class="p">)</span>
+    <span class="n">residual_cv</span><span class="p">,</span><span class="n">err_cv</span><span class="p">,</span><span class="n">msecv</span> <span class="o">=</span> <span class="n">get_residual_stats</span><span class="p">(</span><span class="n">ydata</span><span class="p">,</span><span class="n">class_predicted_cv</span><span class="p">)</span>
+    
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Y data shape&#39;</span><span class="p">,</span><span class="n">ydata</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Output shapes&#39;</span><span class="p">,</span><span class="n">class_predicted_train</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">class_predicted_cv</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Meas squared error:&#39;</span><span class="p">,</span><span class="n">mse</span><span class="p">,</span><span class="n">msecv</span><span class="p">)</span>
+    
+    <span class="c1">#Calculate the pseudo degrees of freedom and the corresponding bootstrap weighting factor</span>
+    <span class="n">num_train</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ydata</span><span class="p">)</span>
+    <span class="n">pseudo_dof</span> <span class="o">=</span> <span class="n">num_train</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="o">/</span><span class="n">msecv</span><span class="p">))</span>
+    <span class="n">bootstrap_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pseudo_dof</span><span class="o">/</span><span class="n">num_train</span><span class="p">)</span>
+    
+    <span class="c1">#Caclulate the weighted residual vector and bootstrap it to generate the bootstrap perturbations</span>
+    <span class="n">residual_weighted</span> <span class="o">=</span> <span class="n">residual</span> <span class="o">/</span> <span class="n">bootstrap_weight</span>
+    <span class="n">residual_boot</span><span class="p">,</span><span class="n">boot_indices</span> <span class="o">=</span> <span class="n">bootstrap_data</span><span class="p">(</span><span class="n">residual_weighted</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">)</span>
+    
+    <span class="c1">#Get the new y data generated by bootstrapping and fit the PLS model to it</span>
+    <span class="n">class_y_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">class_predicted_train</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">residual_boot</span><span class="p">))</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;predicted_train = &#39;</span><span class="p">,</span> <span class="n">class_predicted_train</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;residuals shape = &#39;</span><span class="p">,</span> <span class="n">residual_boot</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;boot data shape = &#39;</span><span class="p">,</span> <span class="n">class_y_boot</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;x data shape = &#39;</span><span class="p">,</span><span class="n">xdata</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    
+    <span class="n">PLS_bootstrap</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">class_y_boot</span><span class="p">)</span>
+    
+    <span class="c1">#Get the bootstrapped predictions from the PLS model</span>
+    <span class="n">class_predicted_boot</span> <span class="o">=</span> <span class="n">PLS_bootstrap</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span>
+    
+    <span class="n">return_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">residual_cv</span><span class="p">,</span><span class="n">err_cv</span><span class="p">,</span><span class="n">msecv</span><span class="p">,</span><span class="n">class_predicted_boot</span><span class="p">,</span><span class="n">class_predicted_train</span><span class="p">,)</span>
+    
+    <span class="k">if</span> <span class="n">return_boot</span><span class="p">:</span>
+        <span class="n">return_out</span> <span class="o">+=</span> <span class="p">(</span><span class="n">PLS_bootstrap</span><span class="p">,)</span>
+    
+    <span class="k">return</span> <span class="n">return_out</span><span class="c1">#residual_cv,err_cv,msecv,class_predicted_boot,class_predicted_train</span></div>
+
+<div class="viewcode-block" id="bootstrap"><a class="viewcode-back" href="../docs.html#ml_uncertainty.bootstrap">[docs]</a><span class="k">def</span> <span class="nf">bootstrap</span><span class="p">(</span><span class="n">xdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ydata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">validdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">PLS_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">PLS_cv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">PLS_bootstrap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">sk_model</span><span class="o">=</span><span class="n">sklearn</span><span class="o">.</span><span class="n">cross_decomposition</span><span class="o">.</span><span class="n">PLSRegression</span><span class="p">,</span><span class="n">regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">cv_object</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">PLS_kw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">return_scores</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_loadings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">tq</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Conducts a simple residual bootstrap analysis on a set of data. Computes cross-validation uncertainty.</span>
+<span class="sd">    </span>
+<span class="sd">    This function performs a full bootstrap and makes no assumption about the shape or structure of the Y data. Each bootstrap sample will have an independent model fit to it.</span>
+<span class="sd">    </span>
+<span class="sd">    If PLS_model is None, then PLS_cv and PLS_bootstrap are ignored. The function will create independent instances of :py:class:sk_model for each of PLS_model, PLS_cv, and PLS_boostrap.</span>
+<span class="sd">    </span>
+<span class="sd">    If PLS_model is not None, then it will be reused for PLS_cv and PLS_bootstrap.</span>
+<span class="sd">    </span>
+<span class="sd">    :key xdata: The X data used to fit the model (default None)</span>
+<span class="sd">    :key ydata: The Y data used to fit the model (default None)</span>
+<span class="sd">    :key validdata: Additional data not used to fit the model but for which uncertainty will be calculated</span>
+<span class="sd">    :key PLS_model: The scikit-learn model that will be fit using X and Y. If None, a new model will be created from sk_model</span>
+<span class="sd">    :key PLS_cv: The scikit-learn model that will be used for cross-validation. If None, same as PLS_model.</span>
+<span class="sd">    :key PLS_bootstrap: The scikit-learn model that will be used for bootstrapping. If None, same as PLS_model.</span>
+<span class="sd">    :key sk_model: If PLS_model,PLS_cv,or PLS_bootstrap is None, this scikit-learn model will be used to create them</span>
+<span class="sd">    :key cv_object: The cross-validation model that will be used for calculating cross-validation statistics</span>
+<span class="sd">    :key class_value: The value separating the classes in PLS-DA</span>
+<span class="sd">    :key samples: The number of samples for bootstrapping</span>
+<span class="sd">    :key PLS_kw: The keyword arguments that will be passed to sk_model</span>
+<span class="sd">    :key return_scores: If True, returns the scores of the PLS_bootstrap model as part of the output</span>
+<span class="sd">    :key return_loadings: If True, returns the loadings of the PLS_bootstrap model as part of the output</span>
+<span class="sd">    :type xdata: ndarray</span>
+<span class="sd">    :type ydata: 1-d array</span>
+<span class="sd">    :type PLS_model: scikit-learn model instance</span>
+<span class="sd">    :type PLS_cv: scikit-learn model instance</span>
+<span class="sd">    :type PLS_bootstrap: scikit-learn model instance</span>
+<span class="sd">    :type s_model: scikit-learn model</span>
+<span class="sd">    :type cv_object: scikit-learn model selection instance</span>
+<span class="sd">    :type class_value: scalar</span>
+<span class="sd">    :type samples: int</span>
+<span class="sd">    :type PLS_kw: dict</span>
+<span class="sd">    :type return_scores: Boolean</span>
+<span class="sd">    :type return_loadings: Boolean</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">PLS_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1">#PLS_model = sklearn.cross_decomposition.PLSRegression(**PLS_kw)</span>
+        <span class="c1">#PLS_cv = sklearn.cross_decomposition.PLSRegression(**PLS_kw)</span>
+        <span class="c1">#PLS_bootstrap = sklearn.cross_decomposition.PLSRegression(**PLS_kw)</span>
+        <span class="n">PLS_model</span> <span class="o">=</span> <span class="n">sk_model</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>
+        <span class="n">PLS_cv</span> <span class="o">=</span> <span class="n">sk_model</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>
+        <span class="n">PLS_bootstrap</span> <span class="o">=</span> <span class="n">sk_model</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>     
+    
+    <span class="k">if</span> <span class="n">PLS_cv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">PLS_cv</span> <span class="o">=</span> <span class="n">PLS_model</span>
+    <span class="k">if</span> <span class="n">PLS_bootstrap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">PLS_bootstrap</span> <span class="o">=</span> <span class="n">PLS_model</span>
+    
+    <span class="k">if</span> <span class="n">cv_object</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cv_object</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+    
+    <span class="n">tpls</span> <span class="o">=</span> <span class="n">PLS_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="p">)</span>
+    <span class="n">scores_base</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">scores_base</span> <span class="o">=</span> <span class="n">PLS_model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span> <span class="c1">#Not all classification models have a transform attribute, so </span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No transform function, skipping scores&#39;</span><span class="p">)</span>
+    
+    <span class="c1">#Get class assignments for the base PLS model (do not do this for regression models)</span>
+    <span class="n">class_assigned_train</span><span class="p">,</span><span class="n">class_predicted_train</span> <span class="o">=</span> <span class="n">class_assignment</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">xdata</span><span class="p">,</span><span class="n">PLS_model</span><span class="o">=</span><span class="n">PLS_model</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="n">class_value</span><span class="p">)</span>
+    
+    <span class="c1">#Cross-validate</span>
+    <span class="n">class_assigned_cv</span><span class="p">,</span><span class="n">class_predicted_cv</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">xdata</span><span class="o">=</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="o">=</span><span class="n">ydata</span><span class="p">,</span>
+                                                         <span class="n">PLS_model</span><span class="o">=</span><span class="n">PLS_cv</span><span class="p">,</span><span class="n">cv_object</span><span class="o">=</span><span class="n">cv_object</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="n">class_value</span><span class="p">)</span>
+    
+    <span class="c1">#Calculate residuals and mean squared errors of regression</span>
+    <span class="n">residual</span><span class="p">,</span><span class="n">err</span><span class="p">,</span><span class="n">mse</span> <span class="o">=</span> <span class="n">get_residual_stats</span><span class="p">(</span><span class="n">ydata</span><span class="p">,</span><span class="n">class_predicted_train</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">residual_cv</span><span class="p">,</span><span class="n">err_cv</span><span class="p">,</span><span class="n">msecv</span> <span class="o">=</span> <span class="n">get_residual_stats</span><span class="p">(</span><span class="n">ydata</span><span class="p">,</span><span class="n">class_predicted_cv</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    
+    <span class="c1">#Calculate the pseudo degrees of freedom and the corresponding bootstrap weighting factor</span>
+    <span class="n">num_train</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ydata</span><span class="p">)</span>
+    <span class="n">pseudo_dof</span> <span class="o">=</span> <span class="n">num_train</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="o">/</span><span class="n">msecv</span><span class="p">))</span>
+    <span class="n">bootstrap_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pseudo_dof</span><span class="o">/</span><span class="n">num_train</span><span class="p">)</span>
+    
+    <span class="c1">#Caclulate the weighted residual vector and bootstrap it to generate the bootstrap perturbations</span>
+    <span class="n">residual_weighted</span> <span class="o">=</span> <span class="n">residual</span> <span class="o">/</span> <span class="n">bootstrap_weight</span>
+    <span class="n">residual_boot</span><span class="p">,</span><span class="n">boot_indices</span> <span class="o">=</span> <span class="n">bootstrap_data</span><span class="p">(</span><span class="n">residual_weighted</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">)</span>
+    
+    <span class="c1">#print residual_boot.shape</span>
+    
+    
+    <span class="c1">#class_predicted_boot = np.empty((len(ydata),0,))</span>
+    <span class="c1">#if validdata is not None:</span>
+    <span class="c1">#    class_valid_boot = np.empty((len(validdata),0,))</span>
+    <span class="c1">#scores_boot = np.empty((0,PLS_kw[&#39;n_components&#39;]))</span>
+    <span class="c1">#scores_valid = np.empty((0,PLS_kw[&#39;n_components&#39;]))</span>
+    <span class="c1">#load_boot = np.empty((xdata.shape[1],0,))</span>
+    
+    <span class="n">class_predicted_boot</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">validdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">class_valid_boot</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">scores_boot</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">scores_valid</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">load_boot</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">if</span> <span class="n">tq</span><span class="p">:</span>
+        <span class="n">iterate</span> <span class="o">=</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm_notebook</span><span class="p">(</span><span class="n">residual_boot</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">iterate</span> <span class="o">=</span> <span class="n">residual_boot</span>
+            
+    
+    
+    <span class="k">for</span> <span class="n">bt</span> <span class="ow">in</span> <span class="n">iterate</span><span class="p">:</span>
+        <span class="c1">#print (class_predicted_train.shape)</span>
+        <span class="c1">#print (bt.shape)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">class_predicted_train</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="c1">#Check to make sure the shapes of class_predicted_train and bt align properly</span>
+            <span class="n">class_y_boot</span> <span class="o">=</span> <span class="n">class_predicted_train</span> <span class="o">+</span> <span class="n">bt</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">class_y_boot</span> <span class="o">=</span> <span class="n">class_predicted_train</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">bt</span><span class="p">)</span>
+        <span class="c1">#print (class_y_boot.shape)</span>
+        
+        <span class="c1">#print bt.shape</span>
+        <span class="c1">#print class_y_boot.shape</span>
+        <span class="c1">#print class_predicted_train.shape</span>
+        
+        <span class="c1">#raise ValueError</span>
+        
+        <span class="n">PLS_bootstrap</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">class_y_boot</span><span class="p">)</span>
+        
+        <span class="n">cp_boot</span> <span class="o">=</span> <span class="n">PLS_bootstrap</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span>
+        <span class="c1">#class_predicted_boot = np.concatenate((class_predicted_boot,cp_boot),axis=1)</span>
+        <span class="n">array_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cp_boot</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">array_dims</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="c1">#the model gives a 2-D array</span>
+            <span class="n">class_predicted_boot</span> <span class="o">+=</span> <span class="p">[</span><span class="n">cp_boot</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1">#the model gives a 1-D array and we have to add a new singleton axis to it</span>
+            <span class="n">class_predicted_boot</span> <span class="o">+=</span> <span class="p">[</span><span class="n">cp_boot</span><span class="p">[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]]</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sc_star</span> <span class="o">=</span> <span class="n">PLS_bootstrap</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span>
+            <span class="n">procrustes_rotation</span><span class="p">,</span><span class="n">procrustes_scale</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">orthogonal_procrustes</span><span class="p">(</span><span class="n">sc_star</span><span class="p">,</span><span class="n">scores_base</span><span class="p">)</span> 
+        
+        
+            <span class="n">sc_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sc_star</span><span class="p">,</span><span class="n">procrustes_rotation</span><span class="p">)</span>
+            <span class="c1">#scores_boot = np.concatenate((scores_boot,sc_boot),axis=0)</span>
+            <span class="n">scores_boot</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sc_boot</span><span class="p">]</span>
+            <span class="n">ld_star</span> <span class="o">=</span> <span class="n">PLS_bootstrap</span><span class="o">.</span><span class="n">x_loadings_</span>
+            <span class="n">ld_boot</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">ld_star</span><span class="p">,</span><span class="n">procrustes_rotation</span><span class="p">)</span>        
+            <span class="c1">#load_boot = np.concatenate((load_boot,ld_boot),axis=1)</span>
+            <span class="n">load_boot</span> <span class="o">+=</span> <span class="p">[</span><span class="n">ld_boot</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        
+        
+        <span class="k">if</span> <span class="n">validdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">valid_boot</span> <span class="o">=</span> <span class="n">PLS_bootstrap</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">validdata</span><span class="p">)</span>
+            <span class="c1">#class_valid_boot = np.concatenate((class_valid_boot,valid_boot),axis=1)</span>
+            <span class="k">if</span> <span class="n">array_dims</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">class_valid_boot</span> <span class="o">+=</span> <span class="p">[</span><span class="n">valid_boot</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">class_valid_boot</span> <span class="o">+=</span> <span class="p">[</span><span class="n">valid_boot</span><span class="p">[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">sc_v</span> <span class="o">=</span> <span class="n">PLS_bootstrap</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">validdata</span><span class="p">)</span>
+                <span class="c1">#scores_valid = np.concatenate((scores_valid,sc_v),axis=0)</span>
+                <span class="n">scores_valid</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sc_v</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        
+        
+    <span class="c1">#print(class_predicted_boot[0].shape)</span>
+    <span class="n">class_predicted_boot</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">class_predicted_boot</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    
+    
+    <span class="n">return_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">residual_cv</span><span class="p">,</span><span class="n">err_cv</span><span class="p">,</span><span class="n">msecv</span><span class="p">,</span><span class="n">class_predicted_boot</span><span class="p">,</span><span class="n">class_predicted_train</span><span class="p">,)</span>
+    
+    <span class="k">if</span> <span class="n">validdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">class_valid_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">class_valid_boot</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">return_out</span> <span class="o">+=</span> <span class="p">(</span><span class="n">class_valid_boot</span><span class="p">,)</span>
+    
+    <span class="k">if</span> <span class="n">return_scores</span><span class="p">:</span>
+        <span class="n">scores_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">scores_boot</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">return_out</span> <span class="o">+=</span> <span class="p">(</span><span class="n">scores_boot</span><span class="p">,)</span>
+        <span class="k">if</span> <span class="n">validdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scores_valid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">scores_valid</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">return_out</span> <span class="o">+=</span> <span class="p">(</span><span class="n">scores_valid</span><span class="p">,)</span>
+    <span class="k">if</span> <span class="n">return_loadings</span><span class="p">:</span>
+        <span class="n">load_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">load_boot</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">return_out</span> <span class="o">+=</span> <span class="p">(</span><span class="n">load_boot</span><span class="p">,)</span>
+    
+    <span class="k">return</span> <span class="n">return_out</span></div>
+
+<div class="viewcode-block" id="bootstrap_unc"><a class="viewcode-back" href="../docs.html#ml_uncertainty.bootstrap_unc">[docs]</a><span class="k">def</span> <span class="nf">bootstrap_unc</span><span class="p">(</span><span class="n">xdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ydata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">valid_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">cv_object</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                        <span class="n">PLS_kw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">return_scores</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">tq</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes the uncertainty in a bootstrap analysis by leave-one-out cross-validation.</span>
+<span class="sd">    </span>
+<span class="sd">    For each sample, the uncertainty is calculated by fitting the other samples to the model, calculating the bootstrap uncertainty and then calculating the uncertainty in the held-out sample.</span>
+<span class="sd">    </span>
+<span class="sd">    :key xdata: The X data used to fit the model (default None)</span>
+<span class="sd">    :key ydata: The Y data used to fit the model (default None)</span>
+<span class="sd">    :key valid_data: Additional data not used to fit the model but for which uncertainty will be calculated</span>
+<span class="sd">    :key cv_object: The cross-validation model that will be used for calculating cross-validation statistics</span>
+<span class="sd">    :key samples: The number of samples for bootstrapping</span>
+<span class="sd">    :key class_value: The value separating the classes in PLS-DA</span>
+<span class="sd">    :key PLS_kw: The keyword arguments that will be passed to sk_model</span>
+<span class="sd">    :key return_scores: If True, returns the scores of the PLS_bootstrap model as part of the output</span>
+<span class="sd">    :type xdata: ndarray</span>
+<span class="sd">    :type ydata: ndarray</span>
+<span class="sd">    :type cv_object: scikit-learn model selection instance</span>
+<span class="sd">    :type class_value: scalar</span>
+<span class="sd">    :type samples: int</span>
+<span class="sd">    :type PLS_kw: dict</span>
+<span class="sd">    :type return_scores: Boolean</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">pls_comps</span> <span class="o">=</span> <span class="n">PLS_kw</span><span class="p">[</span><span class="s1">&#39;n_components&#39;</span><span class="p">]</span>
+    
+    <span class="n">ci_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">predict_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="n">samples</span><span class="p">))</span>
+    <span class="n">scores_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="n">pls_comps</span><span class="p">))</span>
+    
+    <span class="n">ci_boot</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">predict_boot</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">scores_full</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c1">#This should be the base PLS model</span>
+    <span class="n">base_pls</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">cross_decomposition</span><span class="o">.</span><span class="n">PLSRegression</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">base_pls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="p">)</span>
+    <span class="n">class_predicted_train</span> <span class="o">=</span> <span class="n">base_pls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">tq</span><span class="p">:</span>
+        <span class="n">iterate</span> <span class="o">=</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm_notebook</span><span class="p">(</span><span class="n">cv_object</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="p">),</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">ydata</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">iterate</span> <span class="o">=</span> <span class="n">cv_object</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="p">)</span>
+    
+    <span class="c1">#for train_index,test_index in tqdm.tqdm_notebook(cv_object.split(xdata,ydata),total=len(ydata)):</span>
+    <span class="k">for</span> <span class="n">train_index</span><span class="p">,</span><span class="n">test_index</span> <span class="ow">in</span> <span class="n">iterate</span><span class="p">:</span>
+        
+        <span class="c1"># This is the element that is being removed and having its uncertainty calculated</span>
+        <span class="n">this_x</span> <span class="o">=</span> <span class="n">xdata</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span>
+        <span class="n">this_y</span> <span class="o">=</span> <span class="n">ydata</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span>
+        
+        <span class="c1">#This is everything else</span>
+        <span class="n">not_this_x</span> <span class="o">=</span> <span class="n">xdata</span><span class="p">[</span><span class="n">train_index</span><span class="p">]</span>
+        <span class="n">not_this_y</span> <span class="o">=</span> <span class="n">ydata</span><span class="p">[</span><span class="n">train_index</span><span class="p">]</span>
+        
+        <span class="c1">#Create the local PLS models and the stratified K fold cross validation object</span>
+        <span class="n">this_pls</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">cross_decomposition</span><span class="o">.</span><span class="n">PLSRegression</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>
+        <span class="n">this_pls_cv</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">cross_decomposition</span><span class="o">.</span><span class="n">PLSRegression</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>
+        <span class="n">this_pls_boot</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">cross_decomposition</span><span class="o">.</span><span class="n">PLSRegression</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>
+        <span class="n">this_cv</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        
+        
+        <span class="c1">#Boot the straps</span>
+        <span class="n">boot_out</span> <span class="o">=</span> <span class="n">bootstrap</span><span class="p">(</span><span class="n">xdata</span><span class="o">=</span><span class="n">not_this_x</span><span class="p">,</span>
+                                   <span class="n">ydata</span><span class="o">=</span><span class="n">not_this_y</span><span class="p">,</span>
+                                   <span class="n">validdata</span><span class="o">=</span><span class="n">this_x</span><span class="p">,</span>
+                                   <span class="n">PLS_model</span><span class="o">=</span><span class="n">this_pls</span><span class="p">,</span>
+                                   <span class="n">PLS_cv</span> <span class="o">=</span> <span class="n">this_pls_cv</span><span class="p">,</span>
+                                   <span class="n">PLS_bootstrap</span><span class="o">=</span><span class="n">this_pls_boot</span><span class="p">,</span>
+                                   <span class="n">PLS_kw</span><span class="o">=</span><span class="n">PLS_kw</span><span class="p">,</span>
+                                   <span class="n">cv_object</span><span class="o">=</span><span class="n">this_cv</span><span class="p">,</span>
+                                   <span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span>
+                                   <span class="n">class_value</span><span class="o">=</span><span class="n">class_value</span><span class="p">,</span>
+                                   <span class="n">return_scores</span><span class="o">=</span><span class="n">return_scores</span><span class="p">,</span>
+                                   <span class="n">tq</span><span class="o">=</span><span class="n">tq</span><span class="p">)</span>
+        
+        <span class="c1">#class_predicted_boot is the bootstrap predictions for not_this_x</span>
+        <span class="c1">#class_y_base_predict is the single-model class prediction for not_this_x</span>
+        <span class="c1">#class_y_boot_predict is the bootstrap prediction for this_x</span>
+        
+        <span class="c1">#rcv,ecv,msecv,class_predicted_boot,class_y_base_predict,class_y_boot_predict,scores_boot,scores_valid = boot_out</span>
+        <span class="n">rcv</span><span class="p">,</span><span class="n">ecv</span><span class="p">,</span><span class="n">msecv</span><span class="p">,</span><span class="n">boot_ydata</span><span class="p">,</span><span class="n">train_ydata</span><span class="p">,</span><span class="n">boot_this_x</span><span class="p">,</span><span class="n">scores_boot</span><span class="p">,</span><span class="n">scores_valid</span><span class="o">=</span><span class="n">boot_out</span>
+        
+        <span class="c1">#rcv,ecv,msecv,class_predicted_boot,class_predicted_train,scores_boot = lbt_out</span>
+        
+        <span class="c1">#return_out = (residual_cv,err_cv,msecv,class_predicted_boot,class_predicted_train,class_valid_boot,scores_boot,)</span>
+        
+        
+        <span class="c1">#Compute the confidence interval</span>
+        <span class="n">train_ydata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">boot_this_x</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">boot_this_x</span><span class="p">,[</span><span class="mf">2.5</span><span class="p">,</span><span class="mf">97.5</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ci</span><span class="p">])</span>
+        <span class="n">ci</span> <span class="o">=</span> <span class="n">ci</span> <span class="o">-</span> <span class="n">train_ydata</span> <span class="o">+</span> <span class="n">class_predicted_train</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span>
+        <span class="c1">#ci_boot = np.concatenate((ci_boot,ci),axis=0)</span>
+        <span class="n">ci_boot</span> <span class="o">+=</span> <span class="p">[</span><span class="n">ci</span><span class="p">]</span>
+        
+        <span class="c1">#rtrt = (ci,class_y_base_predict,class_y_boot_predict,scores_boot)</span>
+        <span class="c1">#ci,this_predict,class_boot,scores = rtrt</span>
+        
+
+        <span class="n">class_y_boot_predict</span> <span class="o">=</span> <span class="n">boot_this_x</span> <span class="o">-</span> <span class="n">train_ydata</span> <span class="o">+</span> <span class="n">class_predicted_train</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span> 
+        
+        <span class="c1">#predict_boot = np.concatenate((predict_boot,class_y_boot_predict),axis=0)</span>
+        <span class="n">predict_boot</span> <span class="o">+=</span> <span class="p">[</span><span class="n">class_y_boot_predict</span><span class="p">]</span>
+        
+        <span class="c1">#scores_full = np.concatenate((scores_full,scores_valid),axis=0)</span>
+        <span class="n">scores_full</span> <span class="o">+=</span> <span class="p">[</span><span class="n">scores_valid</span><span class="p">]</span>
+    
+    <span class="n">ci_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">ci_boot</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">predict_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">predict_boot</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">scores_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">scores_full</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">ci_boot</span><span class="p">,</span><span class="n">predict_boot</span><span class="p">,</span><span class="n">scores_full</span></div>
+
+
+<div class="viewcode-block" id="pca_bootstrap"><a class="viewcode-back" href="../docs.html#ml_uncertainty.pca_bootstrap">[docs]</a><span class="k">def</span> <span class="nf">pca_bootstrap</span><span class="p">(</span><span class="n">xdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ydata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">groups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">validdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">PCA_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">PCA_cv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">PCA_bootstrap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">skmodel</span><span class="o">=</span><span class="n">sklearn</span><span class="o">.</span><span class="n">decomposition</span><span class="o">.</span><span class="n">PCA</span><span class="p">,</span><span class="n">scaler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">cv_object</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">PCA_kw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">tq</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Conducts a residual bootstrap analysis on a set of data. Computes cross-validation uncertainty.</span>
+<span class="sd">    </span>
+<span class="sd">    This function is the same as :py:func:`bootstrap` but works for unsupervised models such as PCA</span>
+<span class="sd">    </span>
+<span class="sd">    If PLS_model is None, then PLS_cv and PLS_bootstrap are ignored. The function will create independent instances of :py:class:sk_model for each of PLS_model, PLS_cv, and PLS_boostrap.</span>
+<span class="sd">    </span>
+<span class="sd">    If PLS_model is not None, then it will be reused for PLS_cv and PLS_bootstrap.</span>
+<span class="sd">    </span>
+<span class="sd">    :key xdata: The X data used to fit the model (default None)</span>
+<span class="sd">    :key ydata: The Y data used to fit the model (default None)</span>
+<span class="sd">    :key PCA_model: The scikit-learn model that will be fit using X</span>
+<span class="sd">    :key PCA_cv: The scikit-learn model that will be used for cross-validation</span>
+<span class="sd">    :key PCA_bootstrap: The scikit-learn model that will be used for bootstrapping</span>
+<span class="sd">    :key sk_model: If PLS_model,PLS_cv,or PLS_bootstrap is None, this scikit-learn model will be used to create them</span>
+<span class="sd">    :key scaler: The scikit-learn preprocessing object used to preprocess the data. This will be put into a </span>
+<span class="sd">    :key cv_object: The cross-validation model that will be used for calculating cross-validation statistics</span>
+<span class="sd">    :key samples: The number of samples for bootstrapping</span>
+<span class="sd">    :key PCA_kw: The keyword arguments that will be passed to sk_model</span>
+<span class="sd">    :key return_boot: If True, returns the PLS_bootstrap model as part of the output</span>
+<span class="sd">    :type xdata: ndarray</span>
+<span class="sd">    :type ydata: ndarray</span>
+<span class="sd">    :type PCA_model: scikit-learn estimator instance</span>
+<span class="sd">    :type PCA_cv: scikit-learn estimator instance</span>
+<span class="sd">    :type PCA_bootstrap: scikit-learn estimator instance</span>
+<span class="sd">    :type sk_model: scikit-learn estimator class</span>
+<span class="sd">    :type sk_model: scikit-learn preprocessing instance</span>
+<span class="sd">    :type cv_object: scikit-learn model selection instance</span>
+<span class="sd">    :type class_value: scalar</span>
+<span class="sd">    :type samples: int</span>
+<span class="sd">    :type PCA_kw: dict</span>
+<span class="sd">    :type return_boot: Boolean</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">estimator_step_name</span> <span class="o">=</span> <span class="s1">&#39;PCA&#39;</span>
+    <span class="n">scaler_step_name</span> <span class="o">=</span> <span class="s1">&#39;scaler&#39;</span>
+    
+    <span class="k">if</span> <span class="n">PCA_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">PCA_model</span> <span class="o">=</span> <span class="n">skmodel</span><span class="p">(</span><span class="o">**</span><span class="n">PCA_kw</span><span class="p">)</span>
+        <span class="n">PCA_cv</span> <span class="o">=</span> <span class="n">skmodel</span><span class="p">(</span><span class="o">**</span><span class="n">PCA_kw</span><span class="p">)</span>
+        <span class="n">PCA_bootstrap</span> <span class="o">=</span> <span class="n">skmodel</span><span class="p">(</span><span class="o">**</span><span class="n">PCA_kw</span><span class="p">)</span>
+    
+    <span class="n">steps_model</span> <span class="o">=</span> <span class="p">[(</span><span class="n">estimator_step_name</span><span class="p">,</span><span class="n">PCA_model</span><span class="p">)]</span>
+    <span class="n">steps_cv</span> <span class="o">=</span> <span class="p">[(</span><span class="n">estimator_step_name</span><span class="p">,</span><span class="n">PCA_cv</span><span class="p">)]</span>
+    <span class="n">steps_bootstrap</span> <span class="o">=</span> <span class="p">[(</span><span class="n">estimator_step_name</span><span class="p">,</span><span class="n">PCA_bootstrap</span><span class="p">)]</span>
+    
+    <span class="k">if</span> <span class="n">scaler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">steps_model</span> <span class="o">=</span> <span class="p">[(</span><span class="n">scaler_step_name</span><span class="p">,</span> <span class="n">scaler</span><span class="p">),(</span><span class="n">estimator_step_name</span><span class="p">,</span><span class="n">PCA_model</span><span class="p">)]</span>
+        <span class="n">steps_cv</span> <span class="o">=</span> <span class="p">[(</span><span class="n">scaler_step_name</span><span class="p">,</span> <span class="n">scaler</span><span class="p">),(</span><span class="n">estimator_step_name</span><span class="p">,</span><span class="n">PCA_cv</span><span class="p">)]</span>
+        <span class="n">steps_bootstrap</span> <span class="o">=</span> <span class="p">[(</span><span class="n">scaler_step_name</span><span class="p">,</span> <span class="n">scaler</span><span class="p">),(</span><span class="n">estimator_step_name</span><span class="p">,</span><span class="n">PCA_bootstrap</span><span class="p">)]</span>
+    
+    <span class="n">pipe_model</span> <span class="o">=</span> <span class="n">skpipe</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">(</span><span class="n">steps_model</span><span class="p">)</span>
+    <span class="n">pipe_cv</span> <span class="o">=</span> <span class="n">skpipe</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">(</span><span class="n">steps_cv</span><span class="p">)</span>
+    <span class="n">pipe_bootstrap</span> <span class="o">=</span> <span class="n">skpipe</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">(</span><span class="n">steps_bootstrap</span><span class="p">)</span>
+    
+    <span class="n">tpca</span> <span class="o">=</span> <span class="n">pipe_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">pipe_model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span>
+    <span class="n">x_trans</span> <span class="o">=</span> <span class="n">pipe_model</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+    
+    <span class="c1">#cross_validation</span>
+    <span class="n">x_cv</span> <span class="o">=</span> <span class="n">pca_cross_validate</span><span class="p">(</span><span class="n">xdata</span><span class="o">=</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="o">=</span><span class="n">ydata</span><span class="p">,</span><span class="n">groups</span><span class="o">=</span><span class="n">groups</span><span class="p">,</span><span class="n">PCA_model</span><span class="o">=</span><span class="n">pipe_cv</span><span class="p">,</span><span class="n">cv_object</span><span class="o">=</span><span class="n">cv_object</span><span class="p">,</span><span class="n">PCA_kw</span><span class="o">=</span><span class="n">PCA_kw</span><span class="p">)</span>
+    
+    <span class="n">residual</span><span class="p">,</span><span class="n">err</span><span class="p">,</span><span class="n">mse</span> <span class="o">=</span> <span class="n">get_residual_stats</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">x_trans</span><span class="p">)</span>
+    <span class="n">residual_cv</span><span class="p">,</span><span class="n">err_cv</span><span class="p">,</span><span class="n">msecv</span> <span class="o">=</span> <span class="n">get_residual_stats</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">x_cv</span><span class="p">)</span>    
+    
+    <span class="c1">#print mse,msecv</span>
+    
+    <span class="n">num_train</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ydata</span><span class="p">)</span>
+    <span class="n">pseudo_dof</span> <span class="o">=</span> <span class="n">num_train</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="o">/</span><span class="n">msecv</span><span class="p">))</span>
+    <span class="n">bootstrap_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pseudo_dof</span><span class="o">/</span><span class="n">num_train</span><span class="p">)</span>    
+    
+    <span class="c1">#print bootstrap_weight</span>
+    
+    <span class="n">residual_weighted</span> <span class="o">=</span> <span class="n">residual</span> <span class="o">/</span> <span class="n">bootstrap_weight</span>
+    <span class="c1">#x_boot,boot_indices = pls_uncertainty.bootstrap_data(residual_weighted,samples=samples)</span>
+    <span class="n">x_boot</span><span class="p">,</span><span class="n">boot_indices</span> <span class="o">=</span> <span class="n">bootstrap_data</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">)</span>
+    <span class="c1">#x_boot,boot_indices = bootstrap_stratified(xdata,classes=ydata,samples=samples)</span>
+    <span class="c1">#print boot_indices.shape</span>
+    <span class="c1">#print boot_indices</span>
+    
+    <span class="c1">#print x_boot.shape    </span>
+    <span class="c1">#x_boot = x_boot * 2</span>
+    
+    <span class="k">if</span> <span class="n">tq</span><span class="p">:</span>
+        <span class="n">iterate</span> <span class="o">=</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm_notebook</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">x_boot</span><span class="p">,</span><span class="n">boot_indices</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">iterate</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x_boot</span><span class="p">,</span><span class="n">boot_indices</span><span class="p">)</span>
+    
+    <span class="n">scores_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="n">PCA_kw</span><span class="p">[</span><span class="s1">&#39;n_components&#39;</span><span class="p">]))</span>
+    <span class="n">class_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="n">ydata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">comps_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="n">xdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    
+    <span class="n">scores_boot</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">class_boot</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">comps_boot</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="n">components_base</span> <span class="o">=</span> <span class="n">pipe_model</span><span class="o">.</span><span class="n">named_steps</span><span class="p">[</span><span class="n">estimator_step_name</span><span class="p">]</span><span class="o">.</span><span class="n">components_</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">base_scores_boot</span> <span class="o">=</span> <span class="n">pipe_model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span> <span class="c1">#Get the scores for the base X for the base model</span>
+
+    
+    <span class="k">for</span> <span class="n">bt</span><span class="p">,</span><span class="n">index</span> <span class="ow">in</span> <span class="n">iterate</span><span class="p">:</span>
+        <span class="c1">#print bt.shape</span>
+        <span class="c1">#print xdata.shape</span>
+        <span class="c1">#print scores.shape</span>
+        <span class="c1">#break</span>
+        
+        <span class="n">x_bt</span> <span class="o">=</span> <span class="n">bt</span><span class="c1"># xdata + bt</span>
+        <span class="n">y_bt</span> <span class="o">=</span> <span class="n">ydata</span><span class="c1">#[index]</span>
+        
+        <span class="c1">#sc_boot = PCA_model.transform(x_bt)</span>
+        
+        <span class="n">bpca</span> <span class="o">=</span> <span class="n">pipe_bootstrap</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_bt</span><span class="p">)</span> <span class="c1">#Fit the model to the current bootstrap X</span>
+        
+        <span class="c1">#scores_boot_this = PCA_bootstrap.transform(x_bt) #Get the scores for the current bootstrap X for the bootstrap model</span>
+        <span class="c1">#base_scores_boot = PCA_model.transform(x_bt) #Get the scores for the current bootstrap X for the base model</span>
+        
+        <span class="n">scores_boot_this</span> <span class="o">=</span> <span class="n">pipe_bootstrap</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span> <span class="c1">#Get the scores for the base X for the bootstrap model</span>
+        
+        <span class="c1">#print base_scores_boot.shape</span>
+        <span class="c1">#print components_base.shape</span>
+        
+        <span class="c1"># This is the scores + components matrix that Procrustes must match</span>
+        <span class="n">procrustes_target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">base_scores_boot</span><span class="p">,</span><span class="n">components_base</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># This is the matrix that Procrustes will operate on</span>
+        <span class="n">procrustes_operand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">scores_boot_this</span><span class="p">,</span><span class="n">pipe_bootstrap</span><span class="o">.</span><span class="n">named_steps</span><span class="p">[</span><span class="n">estimator_step_name</span><span class="p">]</span><span class="o">.</span><span class="n">components_</span><span class="o">.</span><span class="n">T</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="c1">#Procrustes the bootstrap scores matrix so that our bootstrap scores match the scores of the base model</span>
+        <span class="c1">#procrustes_rotation,procrustes_scale = scipy.linalg.orthogonal_procrustes(scores_boot_this,base_scores_boot) </span>
+        <span class="n">procrustes_rotation</span><span class="p">,</span><span class="n">procrustes_scale</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">orthogonal_procrustes</span><span class="p">(</span><span class="n">procrustes_operand</span><span class="p">,</span><span class="n">procrustes_target</span><span class="p">)</span> 
+        
+        <span class="c1">#Compute the Procrustesed scores and use that as the bootstrap scores result</span>
+        <span class="n">sc_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">scores_boot_this</span><span class="p">,</span><span class="n">procrustes_rotation</span><span class="p">)</span>
+        <span class="n">cp_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">pipe_bootstrap</span><span class="o">.</span><span class="n">named_steps</span><span class="p">[</span><span class="n">estimator_step_name</span><span class="p">]</span><span class="o">.</span><span class="n">components_</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">procrustes_rotation</span><span class="p">)</span>
+        <span class="c1">#print comps_boot.shape</span>
+        <span class="c1">#print cp_boot.shape</span>
+        
+        <span class="c1">#if PCA_bootstrap.components_[0,0] &gt; 0: sc_boot[0] = sc_boot[0] * -1</span>
+        
+        <span class="n">scores_boot</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sc_boot</span><span class="p">]</span>
+        <span class="n">class_boot</span> <span class="o">+=</span> <span class="p">[</span><span class="n">y_bt</span><span class="p">]</span>
+        <span class="n">comps_boot</span> <span class="o">+=</span> <span class="p">[</span><span class="n">cp_boot</span><span class="o">.</span><span class="n">T</span><span class="p">]</span>
+        
+    <span class="n">scores_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">scores_boot</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">class_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">class_boot</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">comps_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">comps_boot</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">scores</span><span class="p">,</span><span class="n">scores_boot</span><span class="p">,</span><span class="n">class_boot</span><span class="p">,</span><span class="n">comps_boot</span></div>
+
+<span class="k">def</span> <span class="nf">pca_cross_validate</span><span class="p">(</span><span class="n">xdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ydata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">groups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">PCA_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">cv_object</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">PCA_kw</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Conducts a cross-validation analysis on a set of data using an unsupervised classification algorithm</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">PCA_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">PCA_model</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">decomposition</span><span class="o">.</span><span class="n">PCA</span><span class="p">(</span><span class="o">**</span><span class="n">PCA_kw</span><span class="p">)</span>
+    
+    <span class="n">num_features</span> <span class="o">=</span> <span class="n">xdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="c1">#Create empty arrays for the cross_validation results</span>
+    <span class="n">x_transcv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]]</span> <span class="o">*</span> <span class="n">num_features</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="n">groups</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">iterate</span> <span class="o">=</span> <span class="n">cv_object</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">iterate</span> <span class="o">=</span> <span class="n">cv_object</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="p">,</span><span class="n">groups</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">train_index</span><span class="p">,</span><span class="n">test_index</span> <span class="ow">in</span> <span class="n">iterate</span><span class="p">:</span>
+        <span class="c1">#Break out the training and test sets for cross-validation</span>
+        <span class="n">x_train</span><span class="p">,</span><span class="n">x_test</span> <span class="o">=</span> <span class="n">xdata</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span><span class="n">xdata</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span>
+        
+        <span class="c1">#Calibrate the PLS model against the CV training set and get the class assignments for the test set</span>
+        <span class="n">PCA_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train</span><span class="p">)</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">PCA_model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x_test</span><span class="p">)</span>
+        <span class="n">x_trans</span> <span class="o">=</span> <span class="n">PCA_model</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+        
+        <span class="c1">#print x_transcv.shape,x_trans.shape</span>
+        
+        <span class="c1">#print class_predicted_cv.shape</span>
+        <span class="c1">#print this_y.shape</span>
+        <span class="n">x_transcv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">x_transcv</span><span class="p">,</span><span class="n">x_trans</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">x_transcv</span>
+
+<span class="k">def</span> <span class="nf">_cross_validate</span><span class="p">(</span><span class="n">xdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ydata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">PLS_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">cv_object</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">sk_model</span><span class="o">=</span><span class="n">sklearn</span><span class="o">.</span><span class="n">cross_decomposition</span><span class="o">.</span><span class="n">PLSRegression</span><span class="p">,</span><span class="n">PLS_kw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Conducts a cross-validation analysis on a set of data using a regression algorithm</span>
+<span class="sd">    </span>
+<span class="sd">    :param xdata:</span>
+<span class="sd">    :param ydata:</span>
+<span class="sd">    :param PLS_model:</span>
+<span class="sd">    :param cv_object:</span>
+<span class="sd">    :param PLS_kw:</span>
+<span class="sd">    :param class_value:</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">PLS_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">PLS_model</span> <span class="o">=</span> <span class="n">sk_model</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>
+    
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1">#The number of classes is equal to the number of class values supplied</span>
+        <span class="n">num_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">class_value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="c1">#If the class value is a float, it won&#39;t have a len(), so len(class_value) returns TypeError. If we get TypeError, assume the user simply gave a single float for class_value and meant for there to be one class</span>
+        <span class="n">num_classes</span> <span class="o">=</span> <span class="mi">1</span>
+    
+    <span class="c1">#Create empty arrays for the cross_validation results</span>
+    <span class="c1">#class_predicted_cv = np.transpose(np.array([[]] * num_classes))</span>
+    <span class="c1">#class_assigned_cv = np.transpose(np.array([[]] * num_classes))</span>
+    <span class="n">class_predicted_cv</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">class_assigned_cv</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">train_index</span><span class="p">,</span><span class="n">test_index</span> <span class="ow">in</span> <span class="n">cv_object</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="p">):</span>
+        <span class="c1">#Break out the training and test sets for cross-validation</span>
+        <span class="n">x_train</span><span class="p">,</span><span class="n">x_test</span> <span class="o">=</span> <span class="n">xdata</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span><span class="n">xdata</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span>
+        <span class="n">y_train</span><span class="p">,</span><span class="n">y_test</span> <span class="o">=</span> <span class="n">ydata</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span><span class="n">ydata</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span>
+        
+        <span class="c1">#Calibrate the PLS model against the CV training set and get the class assignments for the test set</span>
+        <span class="n">PLS_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span><span class="n">y_train</span><span class="p">)</span>
+        <span class="n">this_assigned</span><span class="p">,</span><span class="n">this_y</span> <span class="o">=</span> <span class="n">class_assignment</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">x_test</span><span class="p">,</span><span class="n">PLS_model</span><span class="o">=</span><span class="n">PLS_model</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="n">class_value</span><span class="p">)</span>
+        
+        <span class="c1">#print class_predicted_cv.shape</span>
+        <span class="c1">#print this_y.shape</span>
+        <span class="c1">#class_predicted_cv = np.concatenate((class_predicted_cv,this_y))</span>
+        <span class="c1">#class_assigned_cv = np.concatenate((class_assigned_cv,this_assigned))</span>
+        <span class="c1">#array_dims = len(this_y.shape)</span>
+        <span class="c1">#print(array_dims)</span>
+        <span class="c1">#if array_dims &lt; 2:</span>
+        <span class="c1">#    this_y = this_y[:,np.newaxis]</span>
+        <span class="c1">#    this_assigned = this_assigned[:,np.newaxis]        </span>
+        <span class="n">class_predicted_cv</span> <span class="o">+=</span> <span class="p">[</span><span class="n">this_y</span><span class="p">]</span>
+        <span class="n">class_assigned_cv</span> <span class="o">+=</span> <span class="p">[</span><span class="n">this_assigned</span><span class="p">]</span>
+    <span class="n">class_predicted_cv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">class_predicted_cv</span><span class="p">)</span>
+    <span class="n">class_assigned_cv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">class_assigned_cv</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">class_assigned_cv</span><span class="p">,</span><span class="n">class_predicted_cv</span>
+
+<div class="viewcode-block" id="cross_validate"><a class="viewcode-back" href="../docs.html#ml_uncertainty.cross_validate">[docs]</a><span class="k">def</span> <span class="nf">cross_validate</span><span class="p">(</span><span class="n">xdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ydata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">PLS_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">cv_object</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">sk_model</span><span class="o">=</span><span class="n">sklearn</span><span class="o">.</span><span class="n">cross_decomposition</span><span class="o">.</span><span class="n">PLSRegression</span><span class="p">,</span><span class="n">PLS_kw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Conducts a cross-validation analysis on a set of data using a regression algorithm.</span>
+<span class="sd">    </span>
+<span class="sd">    This function is essentially a pass-through to :py:class:`sklearn.model_selection.cross_val_predict`, and then does PLS-DA class assignments</span>
+<span class="sd">    </span>
+<span class="sd">    :key xdata: The X data used to fit the model (default None)</span>
+<span class="sd">    :key ydata: The Y data used to fit the model (default None)</span>
+<span class="sd">    :key PLS_model: The scikit-learn model that will be fit using X and Y</span>
+<span class="sd">    :key cv_object: The cross-validation model that will be used for calculating cross-validation statistics</span>
+<span class="sd">    :key sk_model: If PLS_model,PLS_cv,or PLS_bootstrap is None, this scikit-learn model will be used to create them</span>
+<span class="sd">    :key PLS_kw: The keyword arguments that will be passed to sk_model</span>
+<span class="sd">    :key class_value: The value separating the classes in PLS-DA</span>
+<span class="sd">    :type xdata: ndarray</span>
+<span class="sd">    :type ydata: ndarray</span>
+<span class="sd">    :type PLS_model: scikit-learn model instance</span>
+<span class="sd">    :type sk_model: scikit-learn model</span>
+<span class="sd">    :type cv_object: scikit-learn model selection instance</span>
+<span class="sd">    :type class_value: scalar</span>
+<span class="sd">    :returns: class_assigned_cv, which is the dummy variable array in PLS-DA, and class_predicted_cv, the array of PLS predictions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">PLS_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">PLS_model</span> <span class="o">=</span> <span class="n">sk_model</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>
+    
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1">#The number of classes is equal to the number of class values supplied</span>
+        <span class="n">num_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">class_value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="c1">#If the class value is a float, it won&#39;t have a len(), so len(class_value) returns TypeError. If we get TypeError, assume the user simply gave a single float for class_value and meant for there to be one class</span>
+        <span class="n">num_classes</span> <span class="o">=</span> <span class="mi">1</span>
+    
+    <span class="n">y_cv</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">cross_val_predict</span><span class="p">(</span><span class="n">PLS_model</span><span class="p">,</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="p">,</span><span class="n">cv</span><span class="o">=</span><span class="n">cv_object</span><span class="p">)</span>
+    
+    <span class="n">class_assigned_cv</span><span class="p">,</span><span class="n">class_predicted_cv</span> <span class="o">=</span> <span class="n">class_assignment</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">y_cv</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="n">class_value</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">class_assigned_cv</span><span class="p">,</span><span class="n">class_predicted_cv</span></div>
+
+<span class="k">def</span> <span class="nf">get_residual_stats</span><span class="p">(</span><span class="n">true_y</span><span class="p">,</span><span class="n">predicted_y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculates the residual, the squared error, and mean squared error given a true y and model-estimated y</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">predicted_y</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">true_y</span><span class="p">)</span> <span class="c1"># Use numpy squeeze to avoid length-1 mismatches</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">residual</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="n">err</span> <span class="o">=</span> <span class="n">residual</span> <span class="o">**</span> <span class="mi">2</span>
+    
+    <span class="n">mse</span> <span class="o">=</span> <span class="n">err</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">true_y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">residual</span><span class="p">,</span><span class="n">err</span><span class="p">,</span><span class="n">mse</span>
+
+<span class="k">def</span> <span class="nf">_bootstrap_uncertainty</span><span class="p">(</span><span class="n">element_number</span><span class="p">,</span>
+                          <span class="n">xdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ydata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">valid_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">class_value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                          <span class="n">PLS_kw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">return_scores</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Conduct a residual bootstrap uncertainty analysis based on leave-one-out cross-validation (leave one sample out, conduct bootstrap on the remaining samples, and use the predictions of the left-out sample as a measure of uncertainty)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#Create the array mask to remove one element from the model array</span>
+    <span class="c1"># this is the element whose uncertainty we are calculating</span>
+    <span class="n">mask</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ydata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="n">mask</span><span class="p">[</span><span class="n">element_number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="c1">#print </span>
+    
+    <span class="c1">#Pop out the X and Y values for this element</span>
+    <span class="c1"># This is the data set against which we will do PLS and bootstrap</span>
+    <span class="n">not_this_x</span> <span class="o">=</span> <span class="n">xdata</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">not_this_y</span> <span class="o">=</span> <span class="n">ydata</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    
+    <span class="c1"># This is the element whose uncertainty we are calculating using PLS and bootstrap</span>
+    <span class="n">this_x</span> <span class="o">=</span> <span class="n">xdata</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">this_y</span> <span class="o">=</span> <span class="n">ydata</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
+    
+    <span class="c1">#Create the PLS and cross-validation models</span>
+    <span class="n">this_pls</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">cross_decomposition</span><span class="o">.</span><span class="n">PLSRegression</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>
+    <span class="n">this_pls_cv</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">cross_decomposition</span><span class="o">.</span><span class="n">PLSRegression</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>
+    <span class="n">this_pls_boot</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">cross_decomposition</span><span class="o">.</span><span class="n">PLSRegression</span><span class="p">(</span><span class="o">**</span><span class="n">PLS_kw</span><span class="p">)</span>
+    <span class="n">this_cv</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+    
+    <span class="c1">#Fit the base PLS model, leaving out the element of interest</span>
+    <span class="n">this_pls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">not_this_x</span><span class="p">,</span><span class="n">not_this_y</span><span class="p">)</span>
+    
+    <span class="n">boot_out</span> <span class="o">=</span> <span class="n">simple_bootstrap</span><span class="p">(</span><span class="n">xdata</span><span class="o">=</span><span class="n">not_this_x</span><span class="p">,</span>
+                                <span class="n">ydata</span><span class="o">=</span><span class="n">not_this_y</span><span class="p">,</span>
+                                <span class="n">PLS_model</span><span class="o">=</span><span class="n">this_pls</span><span class="p">,</span>
+                                <span class="n">PLS_cv</span> <span class="o">=</span> <span class="n">this_pls_cv</span><span class="p">,</span>
+                                <span class="n">PLS_bootstrap</span><span class="o">=</span><span class="n">this_pls_boot</span><span class="p">,</span>
+                                <span class="n">cv_object</span><span class="o">=</span><span class="n">this_cv</span><span class="p">,</span>
+                                <span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span>
+                                <span class="n">class_value</span><span class="o">=</span><span class="n">class_value</span><span class="p">)</span>
+    
+    <span class="n">residual_cv</span><span class="p">,</span><span class="n">err_cv</span><span class="p">,</span><span class="n">msecv</span><span class="p">,</span><span class="n">class_predicted_boot</span><span class="p">,</span><span class="n">class_predicted_train</span> <span class="o">=</span> <span class="n">boot_out</span>
+    
+    <span class="c1">#Generate predictions for the element whose uncertainty we want</span>
+    <span class="n">class_y_boot_predict</span> <span class="o">=</span> <span class="n">this_pls_boot</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">this_x</span><span class="p">)</span>
+    <span class="n">class_y_base_predict</span> <span class="o">=</span> <span class="n">this_pls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">this_x</span><span class="p">)</span>
+    <span class="n">x_score_this</span> <span class="o">=</span> <span class="n">this_pls_boot</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span>
+    <span class="n">class_y_validation</span> <span class="o">=</span> <span class="kc">None</span>
+
+    
+    <span class="c1">#Get 95% confidence intervals for this element</span>
+    <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">class_y_boot_predict</span><span class="p">,[</span><span class="mf">2.5</span><span class="p">,</span><span class="mf">97.5</span><span class="p">])</span>
+    <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ci</span><span class="p">])</span>
+    <span class="n">class_y_base_predict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">class_y_boot_predict</span><span class="p">)</span>
+    
+    <span class="n">return_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">ci</span><span class="p">,</span><span class="n">class_y_base_predict</span><span class="p">,</span><span class="n">class_y_boot_predict</span><span class="p">,)</span>
+    
+    <span class="k">if</span> <span class="n">valid_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">class_y_validation</span> <span class="o">=</span> <span class="n">this_pls_boot</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">valid_data</span><span class="p">)</span>
+        <span class="n">return_out</span> <span class="o">+=</span> <span class="p">(</span><span class="n">class_y_validation</span><span class="p">,)</span>
+        <span class="c1">#return ci,class_y_base_predict,class_y_boot_predict,class_y_validation</span>
+    <span class="k">if</span> <span class="n">return_scores</span><span class="p">:</span>
+        <span class="n">return_out</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x_score_this</span><span class="p">,)</span>
+    <span class="k">return</span> <span class="n">return_out</span>
+    <span class="c1">#return ci,class_y_base_predict,class_y_boot_predict</span>
+
+<div class="viewcode-block" id="misclass_probability"><a class="viewcode-back" href="../docs.html#ml_uncertainty.misclass_probability">[docs]</a><span class="k">def</span> <span class="nf">misclass_probability</span><span class="p">(</span><span class="n">probability_zero</span><span class="p">,</span><span class="n">misclass_mask</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Estimate the misclassification probability of a sample, which is based on the confidence level of the prediction compared to the true value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">misclass_prob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">probability_zero</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">element</span><span class="p">,(</span><span class="n">p_zero</span><span class="p">,</span><span class="n">misclass</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">probability_zero</span><span class="p">,</span><span class="n">misclass_mask</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">p_zero</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+            <span class="n">misclass_prob</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">p_zero</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">misclass_prob</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_zero</span>
+        <span class="c1">#if misclass:</span>
+        <span class="c1">#    misclass_prob[element] = 1 - misclass_prob[element]</span>
+    <span class="k">return</span> <span class="n">misclass_prob</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table of Contents</h3>
+          <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../docs.html">Module Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../toy_regression.html">Example toy problem</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.0.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
