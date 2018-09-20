@@ -3,7 +3,6 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
    
-.. currentmodule:: ml_uncertainty
 
 Machine Learning Uncertainty Estimation Toolbox
 ===============================================
@@ -18,17 +17,6 @@ Machine Learning Uncertainty Estimation Toolbox
 
 Welcome to the home page for the Machine Learning Uncertainty Toolbox. This software is a Python package that calculates uncertainties in machine learning models using bootstrapping and residual bootstrapping. It is intended to interface with scikit-learn but any Python package that uses a similar interface should work.
 
-
-Contents
-++++++++
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-   
-   docs
-   toy_regression
-   
 
 Legal
 +++++
@@ -55,10 +43,3 @@ Links
 `NIST Chemical Informatics Research Group <https://www.nist.gov/mml/csd/chemical-informatics-research-group>`_
 
 `NIST home page <http://nist.gov>`_
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
