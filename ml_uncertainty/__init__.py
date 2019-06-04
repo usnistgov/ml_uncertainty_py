@@ -601,20 +601,20 @@ def pca_bootstrap(xdata=None,ydata=None,groups=None,validdata=None,
     x_trans = pipe_model.inverse_transform(scores)
     
     #cross_validation
-    x_cv = pca_cross_validate(xdata=xdata,ydata=ydata,groups=groups,PCA_model=pipe_cv,cv_object=cv_object,PCA_kw=PCA_kw)
+    #x_cv = pca_cross_validate(xdata=xdata,ydata=ydata,groups=groups,PCA_model=pipe_cv,cv_object=cv_object,PCA_kw=PCA_kw)
     
-    residual,err,mse = get_residual_stats(xdata,x_trans)
-    residual_cv,err_cv,msecv = get_residual_stats(xdata,x_cv)    
+    #residual,err,mse = get_residual_stats(xdata,x_trans)
+    #residual_cv,err_cv,msecv = get_residual_stats(xdata,x_cv)    
     
     #print mse,msecv
     
-    num_train = len(ydata)
-    pseudo_dof = num_train * (1 - np.sqrt(mse/msecv))
-    bootstrap_weight = np.sqrt(1 - pseudo_dof/num_train)    
+    #num_train = xdata.shape[0]
+    #pseudo_dof = num_train * (1 - np.sqrt(mse/msecv))
+    #bootstrap_weight = np.sqrt(1 - pseudo_dof/num_train)    
     
     #print bootstrap_weight
     
-    residual_weighted = residual / bootstrap_weight
+    #residual_weighted = residual / bootstrap_weight
     #x_boot,boot_indices = pls_uncertainty.bootstrap_data(residual_weighted,samples=samples)
     x_boot,boot_indices = bootstrap_data(xdata,samples=samples)
     #x_boot,boot_indices = bootstrap_stratified(xdata,classes=ydata,samples=samples)
@@ -629,9 +629,9 @@ def pca_bootstrap(xdata=None,ydata=None,groups=None,validdata=None,
     else:
         iterate = zip(x_boot,boot_indices)
     
-    scores_boot = np.empty((0,PCA_kw['n_components']))
-    class_boot = np.empty((0,ydata.shape[1]))
-    comps_boot = np.empty((0,xdata.shape[1]))
+    #scores_boot = np.empty((0,PCA_kw['n_components']))
+    #class_boot = np.empty((0,ydata.shape[1]))
+    #comps_boot = np.empty((0,xdata.shape[1]))
     
     scores_boot = []
     class_boot = []
@@ -901,3 +901,339 @@ def misclass_probability(probability_zero,misclass_mask):
         #if misclass:
         #    misclass_prob[element] = 1 - misclass_prob[element]
     return misclass_prob
+
+class bootstrap_estimator(object):
+    def __init__(self,estimator=None,X=None,y=None,nsamples=1000,cv=None,estimator_kw={}, 
+                 samples=None):
+        
+        self.nsamples = nsamples
+        if samples is not None: self.nsamples = samples
+        self.data_ = X
+        self.ydata_ = y
+        self.estimator_ = estimator
+        self.cv_= cv
+        
+        self.boot_data_ = None
+        self.boot_indices_ = None
+        
+        #if cv is None:
+        #    self.cv = sklearn.model_selection.StratifiedKFold(n_splits=6)
+        #if type(cv) is type(int):
+        #    self.cv = sklearn.model_selection.StratifiedKFold(n_splits=cv)
+        
+        self.base_estimator_ = estimator(**estimator_kw)
+        
+        self.estimators_ = []
+        if estimator is not None:
+            self.estimators_ = [estimator(**estimator_kw) for i in range(nsamples)]
+            #for i in range(nsamples):
+            #    self.estimator_list += [estimator(**estimator_kw)]
+    
+    def fit(self,X=None,y=None,*args,**kwargs):
+        
+        if X is not None:
+            self.data_ = X
+        if y is not None:
+            self.ydata_ = y
+        
+        if self.boot_data_ is None:
+            self.bootstrap(samples=self.nsamples)
+        
+        if self.ydata_ is None:
+            self.base_fit(self.data_,self.ydata_,*args,**kwargs)
+            for est,data in zip(self.estimators_,self.boot_data_):
+                est.fit(data,*args,**kwargs)
+        else:
+            self.base_fit(self.data_,self.ydata_,*args,**kwargs)
+            for est,data in zip(self.estimators_,self.boot_data_):
+                est.fit(self.data_,self.ydata_+data,*args,**kwargs)
+            
+    def predict(self,data=None,with_boot=False,with_median=False,*args,**kwargs):
+        #If no data is given, use the stored x data
+        if data is None: data = self.data_
+        if with_median: with_boot=True #with_median implies with_boot
+            
+        base_predict = self.base_estimator_.predict(data,*args,**kwargs)
+        boot_predict = []
+        
+        if not with_boot: return base_predict
+        
+        boot_predict = [est.predict(data,*args,**kwargs) for est in self.estimators_ ]
+        #for est in self.estimators_:
+        #    boot_predict += [est.predict(data,*args,**kwargs)]
+        
+        boot_predict = np.stack(boot_predict, axis=0)
+        
+        if with_median: base_predict = np.median(boot_predict,axis=0)
+        
+        return base_predict,boot_predict
+
+    def transform(self,X=None,y=None,with_boot=False,*args,**kwargs):
+        #If no data is given, use the stored x data
+        if X is None: X = self.data_
+        if y is not None: 
+            args = (y,) + args
+            
+        base_scores = self.base_estimator_.transform(X,*args,**kwargs)
+        
+        if not with_boot:
+            return base_scores
+        
+        boot_scores = []
+        
+        boot_scores = [est.transform(X,*args,**kwargs) for est in self.estimators_]
+        #for est in self.estimators_:
+        #    boot_scores += [est.transform(data,*args,**kwargs)]
+        
+        if y is None:
+            boot_scores = np.stack(boot_scores, axis=0)
+            return base_scores,boot_scores
+        else:
+            boot_x_scores = [x for x,y in boot_scores]
+            boot_y_scores = [y for x,y in boot_scores]
+            boot_x_scores = np.stack(boot_x_scores, axis=0)
+            boot_y_scores = np.stack(boot_y_scores, axis=0)
+            return base_scores,boot_x_scores,boot_y_scores
+        
+        #return base_scores,boot_scores
+    
+    def procrustes_transform(self,data=None,*args,**kwargs):
+        base_scores,boot_scores = self.transform(data,with_boot=True)
+        components_base = self.base_estimator_.components_.T
+
+        procrustes_target = np.concatenate((base_scores,components_base),axis=0)
+
+
+        boot_scores_procrustes = []
+        for est,boot_score in zip(self.estimators_,boot_scores):
+            procrustes_operand = np.concatenate(
+                (boot_score,est.components_.T),
+                axis=0)
+            procrustes_rotation,procrustes_scale = scipy.linalg.orthogonal_procrustes(
+                procrustes_operand,
+                procrustes_target) 
+            boot_scores_procrustes += [np.dot(boot_score,procrustes_rotation)]
+        boot_scores_procrustes = np.stack(boot_scores_procrustes, axis=0)
+        
+        return base_scores,boot_scores,boot_scores_procrustes
+    
+    def base_fit(self,*args,**kwargs):
+        self.base_estimator_.fit(*args,**kwargs)
+    
+    def base_predict(self,*args,**kwargs):
+        return self.base_estimator_.predict(*args,**kwargs)
+    
+    def bootstrap(self,*args,samples=1000,fit_params={},**kwargs):            
+        #If there is no stored y data, bootstrapping should be done on the x data (and bootstrap_weight is just 1)
+        squeeze = False
+        if self.ydata_ is None:
+            data = self.data_
+            bootstrap_weight = 1.0
+        else:
+            #If there is y data, we need to calculate cross-validation and residual statistics, as well as the bootstrap weighting
+            #If y has a trailing singleton dimension, it should be preserved in boot_data, otherwise it should not be preserved
+            if len(self.ydata_.shape) < 2: squeeze = True
+            try:
+                y_pred = self.base_predict(self.data_,
+                                       *args,**fit_params)
+            except sklearn.exceptions.NotFittedError:
+                self.base_fit(self.data_,self.ydata_,
+                                       *args,**fit_params)
+                y_pred = self.base_predict(self.data_,
+                                       *args,)#**fit_params)
+            y_cv = self.cross_validate()
+            
+            residual,err,mse = get_residual_stats(self.ydata_,y_pred)
+            residual_cv,err_cv,msecv = get_residual_stats(self.ydata_,y_cv)
+            
+            #Calculate the pseudo degrees of freedom and the corresponding bootstrap weighting factor
+            num_train = len(self.ydata_)
+            pseudo_dof = num_train * (1 - np.sqrt(mse/msecv))
+            bootstrap_weight = np.sqrt(1 - pseudo_dof/num_train)
+            
+            #If using stored y data, bootstrapping is done on the weighted residuals
+            data = residual / bootstrap_weight
+        
+        self.boot_data_,self.boot_indices_ = bootstrap_data(data,samples=self.nsamples)
+        if squeeze: self.boot_data_ = np.squeeze(self.boot_data_)
+    
+    def cross_validate(self,):        
+        return sklearn.model_selection.cross_val_predict(self.base_estimator_,
+                                                         self.data_,
+                                                         self.ydata_,
+                                                         cv=self.cv_)
+    
+    def bootstrap_uncertainty_bounds(self,data=None,*args,**kwargs):
+        #If no data is given, use the stored x data
+        if data is None: data = self.data_
+        
+        ypred,ypboot = self.predict(data,with_boot=True,*args,**kwargs)
+        
+        y_lower = np.percentile(ypboot,2.5,axis=0)
+        y_upper = np.percentile(ypboot,97.5,axis=0)
+
+        yplus = y_upper - ypred
+        yminus = ypred - y_lower
+        
+        bounds = np.squeeze(np.stack((y_lower,y_upper)))
+        error = np.squeeze(np.stack((yminus,yplus)))
+        
+        return ypred,ypboot,bounds,error
+
+class _bootstrap_estimator(object):
+    def __init__(self,estimator=None,X=None,y=None,samples=1000,cv=None,estimator_kw={}):
+        
+        self.samples = samples
+        self.data = X
+        self.ydata = y
+        self.estimator = estimator
+        self.cv = cv
+        
+        self.boot_data = None
+        self.boot_indices = None
+        
+        #if cv is None:
+        #    self.cv = sklearn.model_selection.StratifiedKFold(n_splits=6)
+        #if type(cv) is type(int):
+        #    self.cv = sklearn.model_selection.StratifiedKFold(n_splits=cv)
+        
+        self.base_estimator = estimator(**estimator_kw)
+        
+        self.estimator_list = []
+        if estimator is not None:
+            for i in range(samples):
+                self.estimator_list += [estimator(**estimator_kw)]
+    
+    def fit(self,X=None,y=None,*args,**kwargs):
+        
+        if X is not None:
+            self.data = X
+        if y is not None:
+            self.ydata = y
+        
+        if self.boot_data is None:
+            self.bootstrap(samples=self.samples)
+        
+        if self.ydata is None:
+            self.base_fit(self.data,self.ydata,*args,**kwargs)
+            for est,data in zip(self.estimator_list,self.boot_data):
+                est.fit(data,*args,**kwargs)
+        else:
+            self.base_fit(self.data,self.ydata,*args,**kwargs)
+            ymodel = np.squeeze(self.base_predict(self.data,*args,**kwargs))
+            for est,data in zip(self.estimator_list,self.boot_data):
+                est.fit(self.data,ymodel+data,*args,**kwargs)
+            
+    def predict(self,data=None,with_boot=False,with_median=False,*args,**kwargs):
+        #If no data is given, use the stored x data
+        if data is None: data = self.data
+        if with_median: with_boot=True #with_median implies with_boot
+            
+        base_predict = self.base_estimator.predict(data,*args,**kwargs)
+        boot_predict = []
+        
+        if not with_boot: return base_predict
+        
+        for est in self.estimator_list:
+            boot_predict += [est.predict(data,*args,**kwargs)]
+        
+        boot_predict = np.stack(boot_predict, axis=0)
+        
+        return base_predict,boot_predict
+
+    def transform(self,data=None,ydata=None,*args,**kwargs):
+        #If no data is given, use the stored x data
+        if data is None: data = self.data
+        if ydata is None: 
+            if self.ydata is not None:
+                args = (self.ydata,) + args
+            
+        base_scores = self.base_estimator.transform(data,*args,**kwargs)
+        boot_scores = []
+        
+        for est in self.estimator_list:
+            boot_scores += [est.transform(data,*args,**kwargs)]
+        
+        boot_scores = np.stack(boot_scores, axis=0)
+        
+        return base_scores,boot_scores
+    
+    def procrustes_transform(self,data=None,*args,**kwargs):
+        base_scores,boot_scores = self.transform(data)
+        components_base = self.base_estimator.components_.T
+
+        procrustes_target = np.concatenate((base_scores,components_base),axis=0)
+
+
+        boot_scores_procrustes = []
+        for est,boot_score in zip(self.estimator_list,boot_scores):
+            procrustes_operand = np.concatenate(
+                (boot_score,est.components_.T),
+                axis=0)
+            procrustes_rotation,procrustes_scale = scipy.linalg.orthogonal_procrustes(
+                procrustes_operand,
+                procrustes_target) 
+            boot_scores_procrustes += [np.dot(boot_score,procrustes_rotation)]
+        boot_scores_procrustes = np.stack(boot_scores_procrustes, axis=0)
+        
+        return base_scores,boot_scores,boot_scores_procrustes
+    
+    def base_fit(self,*args,**kwargs):
+        self.base_estimator.fit(*args,**kwargs)
+    
+    def base_predict(self,*args,**kwargs):
+        return self.base_estimator.predict(*args,**kwargs)
+    
+    def bootstrap(self,samples=1000,fit_params={},*args,**kwargs):            
+        #If there is no stored y data, bootstrapping should be done on the x data (and bootstrap_weight is just 1)
+        if self.ydata is None:
+            data = self.data
+            bootstrap_weight = 1.0
+        else:
+            #If there is y data, we need to calculate cross-validation and residual statistics, as well as the bootstrap weighting
+            #Get the base model predictions. If the base model is not fitted, fit it first.
+            try:
+                y_pred = self.base_predict(self.data,
+                                       *args,**fit_params)
+            except sklearn.exceptions.NotFittedError:
+                self.base_fit(self.data,self.ydata,
+                                       *args,**fit_params)
+                y_pred = self.base_predict(self.data,
+                                       *args,)#**fit_params)
+            y_cv = self.cross_validate()
+            
+            residual,err,mse = get_residual_stats(self.ydata,y_pred)
+            residual_cv,err_cv,msecv = get_residual_stats(self.ydata,y_cv)
+            
+            #Calculate the pseudo degrees of freedom and the corresponding bootstrap weighting factor
+            num_train = len(self.ydata)
+            pseudo_dof = num_train * (1 - np.sqrt(mse/msecv))
+            bootstrap_weight = np.sqrt(1 - pseudo_dof/num_train)
+            
+            #If using stored y data, bootstrapping is done on the weighted residuals
+            data = residual / bootstrap_weight
+        
+        self.boot_data,self.boot_indices = bootstrap_data(data,samples=samples)
+        self.boot_data = np.squeeze(self.boot_data)
+    
+    def cross_validate(self,):        
+        return sklearn.model_selection.cross_val_predict(self.base_estimator,self.data,self.ydata,cv=self.cv)
+    
+    def bootstrap_uncertainty_bounds(self,data=None,*args,**kwargs):
+        #If no data is given, use the stored x data
+        if data is None: data = self.data
+        
+        ypred,ypboot = self.predict(data,with_boot=True,*args,**kwargs)
+        
+        y_lower = np.percentile(ypboot,2.5,axis=0)
+        y_upper = np.percentile(ypboot,97.5,axis=0)
+        ypm = np.median(ypboot,axis=0)
+
+        yplus = y_upper - ypm
+        yminus = ypm - y_lower
+        
+        bounds = np.squeeze(np.stack((y_lower,y_upper)))
+        error = np.squeeze(np.stack((yminus,yplus)))
+        
+        return ypred,ypboot,bounds,error
+    
