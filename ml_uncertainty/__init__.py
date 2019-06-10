@@ -968,11 +968,13 @@ class bootstrap_estimator(object):
         
         return base_predict,boot_predict
 
-    def transform(self,X=None,y=None,with_boot=False,*args,**kwargs):
+    def transform(self,X=None,y=None,with_boot=False,with_y=False,*args,**kwargs):
         #If no data is given, use the stored x data
         if X is None: X = self.data_
         if y is not None: 
             args = (y,) + args
+        if with_y and y is None:
+            args = (self.ydata_,) + args
             
         base_scores = self.base_estimator_.transform(X,*args,**kwargs)
         
