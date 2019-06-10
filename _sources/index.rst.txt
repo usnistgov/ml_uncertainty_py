@@ -27,7 +27,10 @@ Contents
    :caption: Contents:
    
    docs
-   toy_regression
+   toy_regression_object-oriented
+   toy_regression_object-oriented_2nd_order
+   qsar_regression_object-oriented
+   run_environmental_pls-Copy1
    
 
 Legal

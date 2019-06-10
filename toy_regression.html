@@ -15,24 +15,23 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <script type="text/javascript" src="https://pages.nist.gov/nist-header-footer/js/jquery-1.9.0.min.js"></script>
     <script type="text/javascript" src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js"></script>
     <script id="_fed_an_ua_tag" type="text/javascript" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NIST&subagency=github&pua=UA-42404149-54&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery.1.12.4.min.js"></script>
     <script type="text/javascript" src="https://pages.nist.gov/leaveNotice/js/jquery.leaveNotice-nist.min.js"></script>
     <script type="text/javascript" src="_static/leave_notice.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Module Reference" href="docs.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
   </head><body>
     <div class="header-wrapper" role="banner">
       <div class="header">
         <div class="headertitle"><a
           href="index.html">ml_uncertainty 0.1.1 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="docs.html" title="Module Reference"
-             accesskey="P">previous</a> |
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a>
         </div>
@@ -102,18 +101,18 @@ div.nblast {
 
 /* input prompt */
 div.nbinput div.prompt pre {
-    color: #303F9F;
+    color: #307FC1;
 }
 
 /* output prompt */
 div.nboutput div.prompt pre {
-    color: #D84315;
+    color: #BF5B3D;
 }
 
 /* all prompts */
 div.nbinput div.prompt,
 div.nboutput div.prompt {
-    min-width: 7ex;
+    min-width: 4ex;
     padding-top: 0.4em;
     padding-right: 0.4em;
     text-align: right;
@@ -153,9 +152,9 @@ div.nboutput div.output_area {
 
 /* input area */
 div.nbinput div.input_area {
-    border: 1px solid #cfcfcf;
+    border: 1px solid #e0e0e0;
     border-radius: 2px;
-    background: #f7f7f7;
+    background: #f5f5f5;
 }
 
 /* override MathJax center alignment in output cells */
@@ -163,7 +162,7 @@ div.nboutput div[class*=MathJax] {
     text-align: left !important;
 }
 
-/* override sphinx.ext.pngmath center alignment in output cells */
+/* override sphinx.ext.imgmath center alignment in output cells */
 div.nboutput div.math p {
     text-align: left;
 }
@@ -212,6 +211,40 @@ div.nboutput div.output_area.stderr {
 
 .ansi-bold { font-weight: bold; }
 .ansi-underline { text-decoration: underline; }
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
 </style>
 <div class="section" id="Example-toy-problem">
 <h1>Example toy problem<a class="headerlink" href="#Example-toy-problem" title="Permalink to this headline">¶</a></h1>
@@ -219,8 +252,7 @@ div.nboutput div.output_area.stderr {
 <div class="section" id="Imports">
 <h2>Imports<a class="headerlink" href="#Imports" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -241,8 +273,7 @@ div.nboutput div.output_area.stderr {
 <h3>Data for the toy problem<a class="headerlink" href="#Data-for-the-toy-problem" title="Permalink to this headline">¶</a></h3>
 <p>Here’s some X data</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -280,8 +311,7 @@ div.nboutput div.output_area.stderr {
 </div>
 <p>Here’s some Y data</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -323,8 +353,7 @@ div.nboutput div.output_area.stderr {
 <h3>Sklearn models<a class="headerlink" href="#Sklearn-models" title="Permalink to this headline">¶</a></h3>
 <p>Make some sklearn models that we’ll use for regression.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -343,8 +372,7 @@ div.nboutput div.output_area.stderr {
 <div class="math notranslate nohighlight">
 \[\beta = (X^TX)^{-1}X^TY\]</div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -356,8 +384,7 @@ div.nboutput div.output_area.stderr {
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -397,16 +424,15 @@ div.nboutput div.output_area.stderr {
 <h3>Traditional uncertainty calculation<a class="headerlink" href="#Traditional-uncertainty-calculation" title="Permalink to this headline">¶</a></h3>
 <p>This is the equation for the 95% confidence interval for a new prediction <span class="math notranslate nohighlight">\(X_{new}\)</span> (in linear regression).</p>
 <div class="math notranslate nohighlight">
-\[Y_{new} = X_{new}\beta\]</div>
+\[Y_{new} = X_{new}\beta + \epsilon\]</div>
 <div class="math notranslate nohighlight">
 \[\delta Y_{new} = t(0.95,n-2)\Bigg\{
-                         \frac{Y^TY-\beta^TX^TY}{n-2}\Bigg[X_{new}(X^TX)^{-1}X_{new}^T+\frac{1}{n}\Bigg]
+                         \frac{Y^TY-\beta^TX^TY}{n-2}\Bigg[X_{new}(X^TX)^{-1}X_{new}^T+1\Bigg]
                          \Bigg\}^{1/2}\]</div>
 <p>Here, <span class="math notranslate nohighlight">\(t\)</span> is the 95th percentile of the one-sided Student’s T distribution with <span class="math notranslate nohighlight">\(n\)</span> - 2 degrees of freedom, with <span class="math notranslate nohighlight">\(n\)</span> being the number of samples in the regression (i.e. number of rows of <span class="math notranslate nohighlight">\(X\)</span>).</p>
 <p>Calculate the values for the <span class="math notranslate nohighlight">\(t\)</span> distribution and the SSE term.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -433,8 +459,7 @@ div.nboutput div.output_area.stderr {
 </div>
 <p>Calculate the uncertainty in the predicted values</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -443,7 +468,7 @@ div.nboutput div.output_area.stderr {
 <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">xmatrix</span><span class="p">:</span>
 
     <span class="n">yp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">beta</span><span class="p">)</span>
-    <span class="n">pred_unc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_premult</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">icov</span><span class="p">),</span><span class="n">row</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">30</span><span class="p">))</span>
+    <span class="n">pred_unc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_premult</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">icov</span><span class="p">),</span><span class="n">row</span><span class="o">.</span><span class="n">T</span><span class="p">)))</span>
 
     <span class="n">yl</span> <span class="o">+=</span> <span class="p">[</span><span class="n">yp</span> <span class="o">-</span> <span class="n">pred_unc</span><span class="p">]</span>
     <span class="n">yu</span> <span class="o">+=</span> <span class="p">[</span><span class="n">yp</span> <span class="o">+</span> <span class="n">pred_unc</span><span class="p">]</span>
@@ -489,8 +514,7 @@ div.nboutput div.output_area.stderr {
 <p>Use the residual bootstrap of <a class="reference external" href="https://doi.org/10.1016/j.microc.2012.03.006">Almeida</a> This method assumes that the residuals are representative of the uncertainty (which is really the same assumption made by linear regression uncertainty, when you think about it).</p>
 <p>Calculate the mean squared error and the cross-validation error in the regression, then calculate the pseudo-degrees of freedom and the residual weighting that will be bootstrapped. This is a large data set and cross-validation doesnt give us much more information, so the bootstrap weighting is close to 1.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -513,14 +537,13 @@ div.nboutput div.output_area.stderr {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.9651673435291522
+0.9373050564598135
 </pre></div></div>
 </div>
 As an easily demonstrated example, just do bootstraps with 5 samples.
 
 First generate the bootstrap `Y` values that will be passed to the models.<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -535,8 +558,7 @@ First generate the bootstrap `Y` values that will be passed to the models.<div c
 </div>
 <p>Create some plots, generate and plot five regressions.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -595,12 +617,11 @@ First generate the bootstrap `Y` values that will be passed to the models.<div c
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.legend.Legend at 0x7f2f9815ada0&gt;
+<span></span>&lt;matplotlib.legend.Legend at 0x7fc404a387b8&gt;
 </pre></div>
 </div>
 </div>
@@ -623,8 +644,7 @@ First generate the bootstrap `Y` values that will be passed to the models.<div c
 <h3>Using the toolbox<a class="headerlink" href="#Using-the-toolbox" title="Permalink to this headline">¶</a></h3>
 <p>Now do the same thing with 1000 samples. This time we’ll just use the <a class="reference internal" href="docs.html#ml_uncertainty.bootstrap" title="ml_uncertainty.bootstrap"><code class="xref py py-func docutils literal notranslate"><span class="pre">bootstrap()</span></code></a> function, and we can just drop the data straight in.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -648,7 +668,7 @@ No transform function, skipping scores
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "358ba7ad61a34c97891330326bbb793a", "version_major": 2, "version_minor": 0}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9864e4566c404de198f7373e83cfb6e9", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -660,8 +680,7 @@ No transform function, skipping scores
 </div>
 <p>Plot the bootstrap results and show that the bootstrap uncertainty exactly reproduces the results of the linear regression uncertainty.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [54]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -708,9 +727,216 @@ No transform function, skipping scores
 <img alt="_images/toy_regression_27_0.png" src="_images/toy_regression_27_0.png" />
 </div>
 </div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="p">(</span><span class="n">yunc</span><span class="o">-</span><span class="n">intervals</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>array([[ 0.05517332, -0.07119444],
+       [ 0.04859221, -0.07239128],
+       [ 0.04367514, -0.07150052],
+       [ 0.03899877, -0.06750441],
+       [ 0.03571097, -0.06393831],
+       [ 0.03378349, -0.06408298],
+       [ 0.03268463, -0.0641478 ],
+       [ 0.0320849 , -0.05605043],
+       [ 0.02810861, -0.05347956],
+       [ 0.02607774, -0.04879635],
+       [ 0.02441205, -0.04826689],
+       [ 0.02056211, -0.04383436],
+       [ 0.02974614, -0.03918142],
+       [ 0.03018288, -0.03818425],
+       [ 0.02962705, -0.0386364 ],
+       [ 0.03222273, -0.03462113],
+       [ 0.02910533, -0.04496108],
+       [ 0.02638041, -0.04974504],
+       [ 0.02177912, -0.06107879],
+       [ 0.0221806 , -0.06052196],
+       [ 0.02193362, -0.07153582],
+       [ 0.02760917, -0.07829497],
+       [ 0.02603908, -0.08102588],
+       [ 0.03044203, -0.07441155],
+       [ 0.03120508, -0.08133688],
+       [ 0.03661673, -0.08065974],
+       [ 0.04128581, -0.09088041],
+       [ 0.04174182, -0.09245988]])
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">yunc</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>array([[3.71767288, 4.37933362],
+       [3.94497224, 4.55768536],
+       [4.05829695, 4.6471862 ],
+       [4.25035031, 4.79993627],
+       [4.37415123, 4.89924345],
+       [4.39661578, 4.91734401],
+       [4.40784259, 4.92639976],
+       [4.64267299, 5.11750301],
+       [4.89739123, 5.32928352],
+       [5.10528299, 5.50676031],
+       [5.31028956, 5.68712228],
+       [5.46970686, 5.83194329],
+       [5.71961028, 6.0688212 ],
+       [5.81155514, 6.15941933],
+       [5.82171001, 6.16954701],
+       [5.93260462, 6.28176051],
+       [6.21808602, 6.58447319],
+       [6.34309684, 6.72313558],
+       [6.55113315, 6.96131548],
+       [6.56049628, 6.97223491],
+       [6.77396972, 7.22526023],
+       [6.89325358, 7.36964958],
+       [6.93890941, 7.42540652],
+       [7.17465814, 7.71700421],
+       [7.30064121, 7.87497691],
+       [7.41714376, 8.02214758],
+       [7.58672167, 8.2379382 ],
+       [7.70234924, 8.38598384]])
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">intervals</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>array([[4.45052806, 3.66249957],
+       [4.63007664, 3.89638003],
+       [4.71868672, 4.01462181],
+       [4.86744068, 4.21135154],
+       [4.96318176, 4.33844026],
+       [4.98142699, 4.36283229],
+       [4.99054756, 4.37515796],
+       [5.17355344, 4.61058809],
+       [5.38276308, 4.86928262],
+       [5.55555665, 5.07920525],
+       [5.73538917, 5.28587751],
+       [5.87577766, 5.44914475],
+       [6.10800262, 5.68986414],
+       [6.19760358, 5.78137226],
+       [6.20818341, 5.79208296],
+       [6.31638164, 5.90038189],
+       [6.62943427, 6.18898069],
+       [6.77288062, 6.31671643],
+       [7.02239427, 6.52935402],
+       [7.03275687, 6.53831568],
+       [7.29679604, 6.75203609],
+       [7.44794454, 6.86564441],
+       [7.5064324 , 6.91287033],
+       [7.79141576, 7.14421611],
+       [7.95631379, 7.26943614],
+       [8.10280731, 7.38052702],
+       [8.32881861, 7.54543586],
+       [8.47844373, 7.66060742]])
+</pre></div>
+</div>
+</div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">samples</span> <span class="o">=</span> <span class="mi">1000</span>
+
+<span class="n">residual_boot</span><span class="p">,</span><span class="n">boot_indices</span> <span class="o">=</span> <span class="n">plu</span><span class="o">.</span><span class="n">bootstrap_data</span><span class="p">(</span><span class="n">residual_weighted</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">)</span>
+<span class="n">residual_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">residual_boot</span><span class="p">)</span>
+
+<span class="n">boot_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">residual_boot</span> <span class="o">+</span> <span class="n">ypred</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="c1">#boot_data now has the new Y values with shuffled residuals</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">boot_data</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>(1000, 28)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">boot_data</span><span class="o">.</span><span class="n">T</span><span class="p">:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">row</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/toy_regression_33_0.png" src="_images/toy_regression_33_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">boot_data</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>array([0.56608812, 0.54231047, 0.55901546, 0.5459315 , 0.54492867,
+       0.53924983, 0.55297044, 0.58156724, 0.56166797, 0.54072041,
+       0.56269115, 0.55057405, 0.53003111, 0.53496418, 0.54839079,
+       0.54699388, 0.57489016, 0.56853126, 0.56764148, 0.55301693,
+       0.5538737 , 0.56604773, 0.56193022, 0.55383506, 0.55399726,
+       0.55522476, 0.5622612 , 0.55939004])
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -730,15 +956,12 @@ No transform function, skipping scores
         <div class="sidebar">
           <h3>Table of Contents</h3>
           <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="docs.html">Module Reference</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Example toy problem</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#Imports">Imports</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Data-and-Metadata">Data and Metadata</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Regression">Regression</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Uncertainty-Calculation">Uncertainty Calculation</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="toy_regression_object-oriented.html">Example linear regression (1st-order polynomial)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="toy_regression_object-oriented_2nd_order.html">Example linear regression (2nd-order polynomial)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qsar_regression_object-oriented.html">Uncertainty in QSAR modeling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run_environmental_pls-Copy1.html">Uncertainty in biomarker identification</a></li>
 </ul>
 
           <div role="search">
@@ -759,8 +982,6 @@ No transform function, skipping scores
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="docs.html" title="Module Reference"
-              >previous</a> |
             <a href="genindex.html" title="General Index"
               >index</a>
           </div>
@@ -774,7 +995,7 @@ No transform function, skipping scores
         <div class="right">
           
     <div class="footer" role="contentinfo">
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.0.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
         </div>
         <div class="clearer"></div>

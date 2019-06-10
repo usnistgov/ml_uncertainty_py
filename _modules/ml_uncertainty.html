@@ -15,13 +15,15 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
     <script type="text/javascript" src="https://pages.nist.gov/nist-header-footer/js/jquery-1.9.0.min.js"></script>
     <script type="text/javascript" src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js"></script>
     <script id="_fed_an_ua_tag" type="text/javascript" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NIST&subagency=github&pua=UA-42404149-54&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery.1.12.4.min.js"></script>
     <script type="text/javascript" src="https://pages.nist.gov/leaveNotice/js/jquery.leaveNotice-nist.min.js"></script>
     <script type="text/javascript" src="../_static/leave_notice.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
   </head><body>
@@ -648,20 +650,20 @@
     <span class="n">x_trans</span> <span class="o">=</span> <span class="n">pipe_model</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
     
     <span class="c1">#cross_validation</span>
-    <span class="n">x_cv</span> <span class="o">=</span> <span class="n">pca_cross_validate</span><span class="p">(</span><span class="n">xdata</span><span class="o">=</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="o">=</span><span class="n">ydata</span><span class="p">,</span><span class="n">groups</span><span class="o">=</span><span class="n">groups</span><span class="p">,</span><span class="n">PCA_model</span><span class="o">=</span><span class="n">pipe_cv</span><span class="p">,</span><span class="n">cv_object</span><span class="o">=</span><span class="n">cv_object</span><span class="p">,</span><span class="n">PCA_kw</span><span class="o">=</span><span class="n">PCA_kw</span><span class="p">)</span>
+    <span class="c1">#x_cv = pca_cross_validate(xdata=xdata,ydata=ydata,groups=groups,PCA_model=pipe_cv,cv_object=cv_object,PCA_kw=PCA_kw)</span>
     
-    <span class="n">residual</span><span class="p">,</span><span class="n">err</span><span class="p">,</span><span class="n">mse</span> <span class="o">=</span> <span class="n">get_residual_stats</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">x_trans</span><span class="p">)</span>
-    <span class="n">residual_cv</span><span class="p">,</span><span class="n">err_cv</span><span class="p">,</span><span class="n">msecv</span> <span class="o">=</span> <span class="n">get_residual_stats</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">x_cv</span><span class="p">)</span>    
+    <span class="c1">#residual,err,mse = get_residual_stats(xdata,x_trans)</span>
+    <span class="c1">#residual_cv,err_cv,msecv = get_residual_stats(xdata,x_cv)    </span>
     
     <span class="c1">#print mse,msecv</span>
     
-    <span class="n">num_train</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ydata</span><span class="p">)</span>
-    <span class="n">pseudo_dof</span> <span class="o">=</span> <span class="n">num_train</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="o">/</span><span class="n">msecv</span><span class="p">))</span>
-    <span class="n">bootstrap_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pseudo_dof</span><span class="o">/</span><span class="n">num_train</span><span class="p">)</span>    
+    <span class="c1">#num_train = xdata.shape[0]</span>
+    <span class="c1">#pseudo_dof = num_train * (1 - np.sqrt(mse/msecv))</span>
+    <span class="c1">#bootstrap_weight = np.sqrt(1 - pseudo_dof/num_train)    </span>
     
     <span class="c1">#print bootstrap_weight</span>
     
-    <span class="n">residual_weighted</span> <span class="o">=</span> <span class="n">residual</span> <span class="o">/</span> <span class="n">bootstrap_weight</span>
+    <span class="c1">#residual_weighted = residual / bootstrap_weight</span>
     <span class="c1">#x_boot,boot_indices = pls_uncertainty.bootstrap_data(residual_weighted,samples=samples)</span>
     <span class="n">x_boot</span><span class="p">,</span><span class="n">boot_indices</span> <span class="o">=</span> <span class="n">bootstrap_data</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">)</span>
     <span class="c1">#x_boot,boot_indices = bootstrap_stratified(xdata,classes=ydata,samples=samples)</span>
@@ -676,9 +678,9 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">iterate</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x_boot</span><span class="p">,</span><span class="n">boot_indices</span><span class="p">)</span>
     
-    <span class="n">scores_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="n">PCA_kw</span><span class="p">[</span><span class="s1">&#39;n_components&#39;</span><span class="p">]))</span>
-    <span class="n">class_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="n">ydata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-    <span class="n">comps_boot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="n">xdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="c1">#scores_boot = np.empty((0,PCA_kw[&#39;n_components&#39;]))</span>
+    <span class="c1">#class_boot = np.empty((0,ydata.shape[1]))</span>
+    <span class="c1">#comps_boot = np.empty((0,xdata.shape[1]))</span>
     
     <span class="n">scores_boot</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">class_boot</span> <span class="o">=</span> <span class="p">[]</span>
@@ -948,6 +950,344 @@
         <span class="c1">#if misclass:</span>
         <span class="c1">#    misclass_prob[element] = 1 - misclass_prob[element]</span>
     <span class="k">return</span> <span class="n">misclass_prob</span></div>
+
+<span class="k">class</span> <span class="nc">bootstrap_estimator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">estimator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">nsamples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">cv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">estimator_kw</span><span class="o">=</span><span class="p">{},</span> 
+                 <span class="n">samples</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span> <span class="o">=</span> <span class="n">nsamples</span>
+        <span class="k">if</span> <span class="n">samples</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span> <span class="o">=</span> <span class="n">samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span> <span class="o">=</span> <span class="n">estimator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv_</span><span class="o">=</span> <span class="n">cv</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">boot_data_</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boot_indices_</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="c1">#if cv is None:</span>
+        <span class="c1">#    self.cv = sklearn.model_selection.StratifiedKFold(n_splits=6)</span>
+        <span class="c1">#if type(cv) is type(int):</span>
+        <span class="c1">#    self.cv = sklearn.model_selection.StratifiedKFold(n_splits=cv)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator_</span> <span class="o">=</span> <span class="n">estimator</span><span class="p">(</span><span class="o">**</span><span class="n">estimator_kw</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimators_</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">estimator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimators_</span> <span class="o">=</span> <span class="p">[</span><span class="n">estimator</span><span class="p">(</span><span class="o">**</span><span class="n">estimator_kw</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsamples</span><span class="p">)]</span>
+            <span class="c1">#for i in range(nsamples):</span>
+            <span class="c1">#    self.estimator_list += [estimator(**estimator_kw)]</span>
+    
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span> <span class="o">=</span> <span class="n">y</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">boot_data_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">base_fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">est</span><span class="p">,</span><span class="n">data</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimators_</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">boot_data_</span><span class="p">):</span>
+                <span class="n">est</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">base_fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">est</span><span class="p">,</span><span class="n">data</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimators_</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">boot_data_</span><span class="p">):</span>
+                <span class="n">est</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span><span class="o">+</span><span class="n">data</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">with_boot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">with_median</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1">#If no data is given, use the stored x data</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_</span>
+        <span class="k">if</span> <span class="n">with_median</span><span class="p">:</span> <span class="n">with_boot</span><span class="o">=</span><span class="kc">True</span> <span class="c1">#with_median implies with_boot</span>
+            
+        <span class="n">base_predict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator_</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">boot_predict</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">with_boot</span><span class="p">:</span> <span class="k">return</span> <span class="n">base_predict</span>
+        
+        <span class="n">boot_predict</span> <span class="o">=</span> <span class="p">[</span><span class="n">est</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">est</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimators_</span> <span class="p">]</span>
+        <span class="c1">#for est in self.estimators_:</span>
+        <span class="c1">#    boot_predict += [est.predict(data,*args,**kwargs)]</span>
+        
+        <span class="n">boot_predict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">boot_predict</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">with_median</span><span class="p">:</span> <span class="n">base_predict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">boot_predict</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">base_predict</span><span class="p">,</span><span class="n">boot_predict</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">with_boot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">with_y</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1">#If no data is given, use the stored x data</span>
+        <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+            <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">,)</span> <span class="o">+</span> <span class="n">args</span>
+        <span class="k">if</span> <span class="n">with_y</span> <span class="ow">and</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span><span class="p">,)</span> <span class="o">+</span> <span class="n">args</span>
+            
+        <span class="n">base_scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator_</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">with_boot</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">base_scores</span>
+        
+        <span class="n">boot_scores</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="n">boot_scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">est</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">est</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimators_</span><span class="p">]</span>
+        <span class="c1">#for est in self.estimators_:</span>
+        <span class="c1">#    boot_scores += [est.transform(data,*args,**kwargs)]</span>
+        
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">boot_scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">boot_scores</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">base_scores</span><span class="p">,</span><span class="n">boot_scores</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">boot_x_scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="n">boot_scores</span><span class="p">]</span>
+            <span class="n">boot_y_scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="n">boot_scores</span><span class="p">]</span>
+            <span class="n">boot_x_scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">boot_x_scores</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">boot_y_scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">boot_y_scores</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">base_scores</span><span class="p">,</span><span class="n">boot_x_scores</span><span class="p">,</span><span class="n">boot_y_scores</span>
+        
+        <span class="c1">#return base_scores,boot_scores</span>
+    
+    <span class="k">def</span> <span class="nf">procrustes_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">base_scores</span><span class="p">,</span><span class="n">boot_scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">with_boot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">components_base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator_</span><span class="o">.</span><span class="n">components_</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="n">procrustes_target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">base_scores</span><span class="p">,</span><span class="n">components_base</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+
+        <span class="n">boot_scores_procrustes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">est</span><span class="p">,</span><span class="n">boot_score</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimators_</span><span class="p">,</span><span class="n">boot_scores</span><span class="p">):</span>
+            <span class="n">procrustes_operand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">boot_score</span><span class="p">,</span><span class="n">est</span><span class="o">.</span><span class="n">components_</span><span class="o">.</span><span class="n">T</span><span class="p">),</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">procrustes_rotation</span><span class="p">,</span><span class="n">procrustes_scale</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">orthogonal_procrustes</span><span class="p">(</span>
+                <span class="n">procrustes_operand</span><span class="p">,</span>
+                <span class="n">procrustes_target</span><span class="p">)</span> 
+            <span class="n">boot_scores_procrustes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">boot_score</span><span class="p">,</span><span class="n">procrustes_rotation</span><span class="p">)]</span>
+        <span class="n">boot_scores_procrustes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">boot_scores_procrustes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">base_scores</span><span class="p">,</span><span class="n">boot_scores</span><span class="p">,</span><span class="n">boot_scores_procrustes</span>
+    
+    <span class="k">def</span> <span class="nf">base_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">base_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator_</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">bootstrap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">fit_params</span><span class="o">=</span><span class="p">{},</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>            
+        <span class="c1">#If there is no stored y data, bootstrapping should be done on the x data (and bootstrap_weight is just 1)</span>
+        <span class="n">squeeze</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_</span>
+            <span class="n">bootstrap_weight</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#If there is y data, we need to calculate cross-validation and residual statistics, as well as the bootstrap weighting</span>
+            <span class="c1">#If y has a trailing singleton dimension, it should be preserved in boot_data, otherwise it should not be preserved</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span> <span class="n">squeeze</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">,</span>
+                                       <span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">fit_params</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">NotFittedError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">base_fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span><span class="p">,</span>
+                                       <span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">fit_params</span><span class="p">)</span>
+                <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">,</span>
+                                       <span class="o">*</span><span class="n">args</span><span class="p">,)</span><span class="c1">#**fit_params)</span>
+            <span class="n">y_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_validate</span><span class="p">()</span>
+            
+            <span class="n">residual</span><span class="p">,</span><span class="n">err</span><span class="p">,</span><span class="n">mse</span> <span class="o">=</span> <span class="n">get_residual_stats</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span><span class="p">,</span><span class="n">y_pred</span><span class="p">)</span>
+            <span class="n">residual_cv</span><span class="p">,</span><span class="n">err_cv</span><span class="p">,</span><span class="n">msecv</span> <span class="o">=</span> <span class="n">get_residual_stats</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span><span class="p">,</span><span class="n">y_cv</span><span class="p">)</span>
+            
+            <span class="c1">#Calculate the pseudo degrees of freedom and the corresponding bootstrap weighting factor</span>
+            <span class="n">num_train</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span><span class="p">)</span>
+            <span class="n">pseudo_dof</span> <span class="o">=</span> <span class="n">num_train</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="o">/</span><span class="n">msecv</span><span class="p">))</span>
+            <span class="n">bootstrap_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pseudo_dof</span><span class="o">/</span><span class="n">num_train</span><span class="p">)</span>
+            
+            <span class="c1">#If using stored y data, bootstrapping is done on the weighted residuals</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">residual</span> <span class="o">/</span> <span class="n">bootstrap_weight</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">boot_data_</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">boot_indices_</span> <span class="o">=</span> <span class="n">bootstrap_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">squeeze</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">boot_data_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">boot_data_</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">cross_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>        
+        <span class="k">return</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">cross_val_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_estimator_</span><span class="p">,</span>
+                                                         <span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">,</span>
+                                                         <span class="bp">self</span><span class="o">.</span><span class="n">ydata_</span><span class="p">,</span>
+                                                         <span class="n">cv</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv_</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">bootstrap_uncertainty_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1">#If no data is given, use the stored x data</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_</span>
+        
+        <span class="n">ypred</span><span class="p">,</span><span class="n">ypboot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">with_boot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="n">y_lower</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">ypboot</span><span class="p">,</span><span class="mf">2.5</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">y_upper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">ypboot</span><span class="p">,</span><span class="mf">97.5</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">yplus</span> <span class="o">=</span> <span class="n">y_upper</span> <span class="o">-</span> <span class="n">ypred</span>
+        <span class="n">yminus</span> <span class="o">=</span> <span class="n">ypred</span> <span class="o">-</span> <span class="n">y_lower</span>
+        
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">y_lower</span><span class="p">,</span><span class="n">y_upper</span><span class="p">)))</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">yminus</span><span class="p">,</span><span class="n">yplus</span><span class="p">)))</span>
+        
+        <span class="k">return</span> <span class="n">ypred</span><span class="p">,</span><span class="n">ypboot</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">error</span>
+
+<span class="k">class</span> <span class="nc">_bootstrap_estimator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">estimator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">cv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">estimator_kw</span><span class="o">=</span><span class="p">{}):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="n">samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ydata</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="n">estimator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv</span> <span class="o">=</span> <span class="n">cv</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">boot_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boot_indices</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="c1">#if cv is None:</span>
+        <span class="c1">#    self.cv = sklearn.model_selection.StratifiedKFold(n_splits=6)</span>
+        <span class="c1">#if type(cv) is type(int):</span>
+        <span class="c1">#    self.cv = sklearn.model_selection.StratifiedKFold(n_splits=cv)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span> <span class="o">=</span> <span class="n">estimator</span><span class="p">(</span><span class="o">**</span><span class="n">estimator_kw</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">estimator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator_list</span> <span class="o">+=</span> <span class="p">[</span><span class="n">estimator</span><span class="p">(</span><span class="o">**</span><span class="n">estimator_kw</span><span class="p">)]</span>
+    
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ydata</span> <span class="o">=</span> <span class="n">y</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">boot_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ydata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">base_fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">est</span><span class="p">,</span><span class="n">data</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator_list</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">boot_data</span><span class="p">):</span>
+                <span class="n">est</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">base_fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">ymodel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">est</span><span class="p">,</span><span class="n">data</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator_list</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">boot_data</span><span class="p">):</span>
+                <span class="n">est</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">ymodel</span><span class="o">+</span><span class="n">data</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">with_boot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">with_median</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1">#If no data is given, use the stored x data</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="n">with_median</span><span class="p">:</span> <span class="n">with_boot</span><span class="o">=</span><span class="kc">True</span> <span class="c1">#with_median implies with_boot</span>
+            
+        <span class="n">base_predict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">boot_predict</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">with_boot</span><span class="p">:</span> <span class="k">return</span> <span class="n">base_predict</span>
+        
+        <span class="k">for</span> <span class="n">est</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_list</span><span class="p">:</span>
+            <span class="n">boot_predict</span> <span class="o">+=</span> <span class="p">[</span><span class="n">est</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)]</span>
+        
+        <span class="n">boot_predict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">boot_predict</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">base_predict</span><span class="p">,</span><span class="n">boot_predict</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ydata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1">#If no data is given, use the stored x data</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="n">ydata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ydata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata</span><span class="p">,)</span> <span class="o">+</span> <span class="n">args</span>
+            
+        <span class="n">base_scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">boot_scores</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">est</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_list</span><span class="p">:</span>
+            <span class="n">boot_scores</span> <span class="o">+=</span> <span class="p">[</span><span class="n">est</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)]</span>
+        
+        <span class="n">boot_scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">boot_scores</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">base_scores</span><span class="p">,</span><span class="n">boot_scores</span>
+    
+    <span class="k">def</span> <span class="nf">procrustes_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">base_scores</span><span class="p">,</span><span class="n">boot_scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">components_base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span><span class="o">.</span><span class="n">components_</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="n">procrustes_target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">base_scores</span><span class="p">,</span><span class="n">components_base</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+
+        <span class="n">boot_scores_procrustes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">est</span><span class="p">,</span><span class="n">boot_score</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator_list</span><span class="p">,</span><span class="n">boot_scores</span><span class="p">):</span>
+            <span class="n">procrustes_operand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">boot_score</span><span class="p">,</span><span class="n">est</span><span class="o">.</span><span class="n">components_</span><span class="o">.</span><span class="n">T</span><span class="p">),</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">procrustes_rotation</span><span class="p">,</span><span class="n">procrustes_scale</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">orthogonal_procrustes</span><span class="p">(</span>
+                <span class="n">procrustes_operand</span><span class="p">,</span>
+                <span class="n">procrustes_target</span><span class="p">)</span> 
+            <span class="n">boot_scores_procrustes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">boot_score</span><span class="p">,</span><span class="n">procrustes_rotation</span><span class="p">)]</span>
+        <span class="n">boot_scores_procrustes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">boot_scores_procrustes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">base_scores</span><span class="p">,</span><span class="n">boot_scores</span><span class="p">,</span><span class="n">boot_scores_procrustes</span>
+    
+    <span class="k">def</span> <span class="nf">base_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">base_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">bootstrap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">fit_params</span><span class="o">=</span><span class="p">{},</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>            
+        <span class="c1">#If there is no stored y data, bootstrapping should be done on the x data (and bootstrap_weight is just 1)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ydata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">bootstrap_weight</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#If there is y data, we need to calculate cross-validation and residual statistics, as well as the bootstrap weighting</span>
+            <span class="c1">#Get the base model predictions. If the base model is not fitted, fit it first.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                                       <span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">fit_params</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">NotFittedError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">base_fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata</span><span class="p">,</span>
+                                       <span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">fit_params</span><span class="p">)</span>
+                <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                                       <span class="o">*</span><span class="n">args</span><span class="p">,)</span><span class="c1">#**fit_params)</span>
+            <span class="n">y_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_validate</span><span class="p">()</span>
+            
+            <span class="n">residual</span><span class="p">,</span><span class="n">err</span><span class="p">,</span><span class="n">mse</span> <span class="o">=</span> <span class="n">get_residual_stats</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata</span><span class="p">,</span><span class="n">y_pred</span><span class="p">)</span>
+            <span class="n">residual_cv</span><span class="p">,</span><span class="n">err_cv</span><span class="p">,</span><span class="n">msecv</span> <span class="o">=</span> <span class="n">get_residual_stats</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata</span><span class="p">,</span><span class="n">y_cv</span><span class="p">)</span>
+            
+            <span class="c1">#Calculate the pseudo degrees of freedom and the corresponding bootstrap weighting factor</span>
+            <span class="n">num_train</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata</span><span class="p">)</span>
+            <span class="n">pseudo_dof</span> <span class="o">=</span> <span class="n">num_train</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="o">/</span><span class="n">msecv</span><span class="p">))</span>
+            <span class="n">bootstrap_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pseudo_dof</span><span class="o">/</span><span class="n">num_train</span><span class="p">)</span>
+            
+            <span class="c1">#If using stored y data, bootstrapping is done on the weighted residuals</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">residual</span> <span class="o">/</span> <span class="n">bootstrap_weight</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">boot_data</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">boot_indices</span> <span class="o">=</span> <span class="n">bootstrap_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boot_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">boot_data</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">cross_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>        
+        <span class="k">return</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">cross_val_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata</span><span class="p">,</span><span class="n">cv</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">bootstrap_uncertainty_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1">#If no data is given, use the stored x data</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        
+        <span class="n">ypred</span><span class="p">,</span><span class="n">ypboot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">with_boot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="n">y_lower</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">ypboot</span><span class="p">,</span><span class="mf">2.5</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">y_upper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">ypboot</span><span class="p">,</span><span class="mf">97.5</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">ypm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">ypboot</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">yplus</span> <span class="o">=</span> <span class="n">y_upper</span> <span class="o">-</span> <span class="n">ypm</span>
+        <span class="n">yminus</span> <span class="o">=</span> <span class="n">ypm</span> <span class="o">-</span> <span class="n">y_lower</span>
+        
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">y_lower</span><span class="p">,</span><span class="n">y_upper</span><span class="p">)))</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">yminus</span><span class="p">,</span><span class="n">yplus</span><span class="p">)))</span>
+        
+        <span class="k">return</span> <span class="n">ypred</span><span class="p">,</span><span class="n">ypboot</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">error</span>
+    
 </pre></div>
 
           </div>
@@ -959,7 +1299,10 @@
           <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../docs.html">Module Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../toy_regression.html">Example toy problem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../toy_regression_object-oriented.html">Example linear regression (1st-order polynomial)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../toy_regression_object-oriented_2nd_order.html">Example linear regression (2nd-order polynomial)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../qsar_regression_object-oriented.html">Uncertainty in QSAR modeling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../run_environmental_pls-Copy1.html">Uncertainty in biomarker identification</a></li>
 </ul>
 
           <div role="search">
@@ -990,7 +1333,7 @@
         <div class="right">
           
     <div class="footer" role="contentinfo">
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.0.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
         </div>
         <div class="clearer"></div>
